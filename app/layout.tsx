@@ -13,7 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Vintage DTP | Urdu & Kashmiri Paper Formatting",
+  title:
+    "Vintage DTP | Urdu & Kashmiri Paper Formatting",
 
   description:
     "Professional Urdu and Kashmiri paper formatting service for schools, teachers, and coaching centers.",
@@ -22,10 +23,8 @@ export const metadata = {
     "Urdu papers",
     "Kashmiri papers",
     "DTP",
-    "School papers",
-    "Paper formatting",
-    "Exam papers",
     "Question papers",
+    "Exam papers",
   ],
 
   authors: [
@@ -33,6 +32,30 @@ export const metadata = {
       name: "Vintage DTP",
     },
   ],
+
+  openGraph: {
+    title:
+      "Vintage DTP",
+
+    description:
+      "Professional Urdu and Kashmiri paper formatting service.",
+
+    type: "website",
+
+    url:
+      "https://dtp-gules.vercel.app",
+  },
+
+  twitter: {
+    card:
+      "summary_large_image",
+
+    title:
+      "Vintage DTP",
+
+    description:
+      "Professional Urdu and Kashmiri paper formatting service.",
+  },
 };
 
 export default function RootLayout({
