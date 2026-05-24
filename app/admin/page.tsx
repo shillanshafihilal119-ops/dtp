@@ -16,10 +16,19 @@ export default function AdminPage() {
   useEffect(() => {
   const isAdmin =
     localStorage.getItem("isAdmin");
+  
+  const loginTime =
+  localStorage.getItem("adminLoginTime");
 
-  if (isAdmin !== "true") {
+  const expired =
+    !loginTime ||
+    Date.now() - Number(loginTime) >
+    24 * 60 * 60 * 1000;
+
+  if (isAdmin !== "true" || expired) {
     router.push("/admin-login");
-
+    localStorage.removeItem("isAdmin");
+    localStorage.removeItem("adminLoginTime");
     return;
   }
 

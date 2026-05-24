@@ -12,6 +12,11 @@ export default function AdminLoginPage() {
 
     if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
       localStorage.setItem("isAdmin", "true");
+      localStorage.setItem(
+      "adminLoginTime",
+      Date.now().toString()
+      );
+      
       router.push("/admin");
     } else {
       alert("Wrong password");
