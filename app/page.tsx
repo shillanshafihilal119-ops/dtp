@@ -125,7 +125,7 @@ if (file) {
   return (
     <main className="min-h-screen p-4 sm:p-10">
       <h1 className="text-3xl font-bold mb-6">
-        Urdu/Kashmiri Paper Service
+        Urdu / Kashmiri Paper Formatting Service
       </h1>
 
       <a
