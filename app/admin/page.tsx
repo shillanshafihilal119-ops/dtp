@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
+
+
 export default function AdminPage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [search, setSearch] = useState("");
