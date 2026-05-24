@@ -1,0 +1,180 @@
+"use client";
+
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+export default function TrackPage() {
+  const [phone, setPhone] = useState("");
+  const [requestId, setRequestId] = useState("");
+  const [requests, setRequests] = useState<any[]>([]);
+  const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function searchRequests(e: React.FormEvent) {
+  e.preventDefault();
+
+  if (!phone && !requestId)
+    {
+    alert("Please enter phone number or request ID.");
+    return;
+    }
+
+  setSearched(false);
+  setLoading(true);
+
+  const { data, error } = await supabase
+    .from("paper_requests")
+    .select("*")
+    .or(`phone.eq.${phone},request_id.eq.${requestId}`)
+    .order("created_at", { ascending: false });
+
+  setLoading(false);
+  setSearched(true);
+
+  if (error) {
+    alert("Could not find requests");
+    console.log(error);
+  } else {
+    setRequests(data || []);
+  }
+}
+
+  
+
+  return (
+    <main className="min-h-screen p-4 sm:p-10">
+      <h1 className="text-3xl font-bold mb-6">
+        Track Your Paper
+      </h1>
+
+      <form
+      onSubmit={searchRequests}
+      className="flex flex-col sm:flex-row gap-3 mb-8"
+      >
+        <input
+          type="text"
+          placeholder="Enter phone number"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value.replace(/\D/g, "")) }
+          maxLength={12}
+          className="border p-3 rounded w-full"
+        />
+
+        <input
+         type="text"
+          placeholder="Enter Request ID"
+         value={requestId}
+        onChange={(e) =>
+        setRequestId(
+        e.target.value
+        .toUpperCase()
+        .replace(
+        /[^A-Z0-9-]/g,
+        ""
+      )
+  )
+}
+        maxLength={20}
+        className="border p-3 rounded w-full"
+/>
+
+        <button
+  disabled={loading}
+  className="bg-black text-white px-5 py-3 rounded disabled:opacity-50"
+>
+  {loading ? "Searching..." : "Search"}
+</button>
+
+      </form>
+
+      <div className="grid gap-5">
+        {requests.map((request) => (
+          <div key={request.id} className="border p-5 rounded">
+            <p>Class: {request.class}</p>
+            <p>Subject: {request.subject}</p>
+            <p>Session: {request.session}</p>
+            <p>Examination: {request.examination}</p>
+            <p>Marks: {request.marks}</p>
+            <p>Duration: {request.duration}</p>
+            <p>Medium: {request.medium}</p>
+            <p>Status: {request.status}</p>
+            {request.preview_url && (
+  <div className="mt-4">
+    <p className="mb-2 font-semibold">
+      Paper Preview
+    </p>
+
+    <img
+      src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/paper-previews/${request.preview_url}`}
+      alt="Paper Preview"
+      className="mt-4 rounded border w-full max-w-md"
+    />
+  </div>
+)}
+
+{loading && (
+  <p className="mb-6 text-blue-500">
+    Searching request...
+  </p>
+)}
+
+            {request.final_pdf_url && request.payment_status === "Paid" && request.status === "Ready" && (
+  <div className="mt-4 border p-4 rounded bg-yellow-50 text-black">
+    <p className="font-semibold">
+      Your paper is ready.
+    </p>
+
+    <p className="mt-2">
+      Preview is available above. Complete payment to unlock the final PDF.
+    </p>
+
+    <div className="mt-4">
+      <p>
+        Amount: ₹49
+      </p>
+
+      <p>
+        Request ID: {request.request_id}
+      </p>
+
+      <p>
+        UPI ID: shillanshafihilal119@okhdfcbank
+      </p>
+
+      <p>
+        After payment, send screenshot on WhatsApp.
+      </p>
+
+      <a
+        href="https://wa.me/917889410756?text=I%20have%20completed%20the%20payment%20for%20my%20paper%20request.%20My%20Request%20ID%20is%20{request.request_id}."
+        target="_blank"
+        className="inline-block mt-3 bg-green-600 text-white px-4 py-2 rounded"
+      >
+        Send Payment Screenshot
+      </a>
+    </div>
+  </div>
+)}
+
+          {request.final_pdf_url && request.payment_status === "Paid" && (
+  <a
+    href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`}
+    target="_blank"
+    className="text-blue-600 underline block mt-3"
+  >
+    Download Final Paper
+  </a>
+)}
+          </div>
+        ))}
+
+        {searched && requests.length === 0 && (
+  <p className="mt-6 text-red-500">
+    No request found. Please check your phone number or request ID.
+  </p>
+)}
+
+      </div>
+    </main>
+  );
+}
