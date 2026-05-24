@@ -23,7 +23,7 @@ export default function AdminPage() {
   const expired =
     !loginTime ||
     Date.now() - Number(loginTime) >
-    10000;
+    24 * 60 * 60 * 1000;
 
   if (isAdmin !== "true" || expired) {
     router.push("/admin-login");
