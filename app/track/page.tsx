@@ -169,6 +169,23 @@ export default function TrackPage() {
   <a
     href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`}
     target="_blank"
+    onClick={async () => {
+  await supabase
+    .from("paper_requests")
+    .update({ status: "Delivered" })
+    .eq("id", request.id);
+
+  setRequests((prev) =>
+    prev.map((item) =>
+      item.id === request.id
+        ? {
+            ...item,
+            status: "Delivered",
+          }
+        : item
+    )
+  );
+}} 
     className="text-blue-600 underline block mt-3"
   >
     Download Final Paper

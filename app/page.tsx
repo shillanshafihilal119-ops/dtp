@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function Home() {
@@ -14,6 +14,8 @@ export default function Home() {
   const [duration, setDuration] = useState("");
   const [medium, setMedium] = useState("");
   const [instructions, setInstructions] = useState("");
+  const submittedBoxRef = useRef<HTMLDivElement | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const [submittedId, setSubmittedId] = useState("");
 
@@ -87,6 +89,8 @@ if (file) {
   .from("paper_requests")
   .insert([
     {
+      status: "Submitted",
+      payment_status: "Unpaid",
       request_id: requestId,
       teacher_name: teacherName,
       phone: phone,
@@ -109,6 +113,13 @@ if (file) {
     } else {
       setSubmittedId(requestId);
       setLoading(false);
+
+      setTimeout(() => {
+      submittedBoxRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+      });
+      }, 100);
 
       setTeacherName("");
       setPhone("");
@@ -292,25 +303,31 @@ if (file) {
 </button>
 
 {submittedId && (
-  <div className="border p-4 rounded mt-4 bg-green-50 text-black">
-    <p className="text-black">
+  <div 
+    ref = {submittedBoxRef}
+      className="border p-4 rounded mt-4 bg-black text-white">
+    <p className="text-white mb-2">
       Request submitted!
     </p>
 
-    <p className="font-bold text-black">
+    <p className="font-bold text-white mb-2">
       Request ID: {submittedId}
     </p>
 
     <button
       type="button"
-      onClick={() =>
-        navigator.clipboard.writeText(
-          submittedId
-        )
-      }
-      className="bg-black text-white px-4 py-2 rounded mt-2"
+      onClick={async () => {
+      await navigator.clipboard.writeText(submittedId);
+      setCopied(true);
+
+      setTimeout(() => {
+      setCopied(false);
+      }, 1500);
+      }}
+
+      className="bg-yellow-500 text-black px-4 py-2 rounded mt-2"
     >
-      Copy Request ID
+      {copied ? "Copied!" : "Copy Request ID"}
     </button>
   </div>
 )}

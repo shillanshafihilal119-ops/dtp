@@ -455,25 +455,32 @@ async function uploadPreview(
             >
             Delete
             </button>
-            <div className="mt-4">
-  <p className="mb-2 font-semibold">
-    Upload Final PDF for Download
-  </p>
 
-  <input
-  className="border p-3 rounded"
-    type="file"
-    accept=".pdf"
-    onChange={(e) => {
-      if (e.target.files?.[0]) {
-        uploadFinalPdf(
-          request.id,
-          e.target.files[0]
-        );
-      }
-    }}
-  />
-</div>
+            {!request.final_pdf_url ? (
+            <div className="mt-4">
+            <p className="mb-2 font-semibold">
+            Upload Final PDF for Download
+            </p>
+
+            <input
+            className="border p-3 rounded"
+            type="file"
+            accept=".pdf"
+            onChange={(e) => {
+            if (e.target.files?.[0]) {
+              uploadFinalPdf(
+            request.id,
+            e.target.files[0]
+          );
+        }
+      }}
+    />
+  </div>
+) : (
+  <p className="mt-4 text-green-500 font-semibold">
+    Final PDF already uploaded
+  </p>
+)}
 
 <div className="mt-4">
   <p className="mb-2 font-semibold">
