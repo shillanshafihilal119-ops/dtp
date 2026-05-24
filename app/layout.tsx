@@ -13,15 +13,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Vintage DTP | Urdu & Kashmiri Paper Formatting",
+  title:
+  "Vintage DTP | Urdu & Kashmiri Question Paper Formatting",
 
-  description:
-    "Get professional Urdu and Kashmiri question papers formatted accurately and delivered within 1 day for schools, teachers, and coaching centers.",
+description:
+  "Get Urdu and Kashmiri question papers professionally formatted with accurate layout, clean PDF delivery, and fast 1 day turnaround for teachers and schools.",
 
   openGraph: {
-    title: "Vintage DTP | Urdu & Kashmiri Paper Formatting",
-    description:
-      "Professional Urdu and Kashmiri question paper formatting with 1 day delivery for schools, teachers, and coaching centers.",
+   title:
+  "Vintage DTP | Urdu & Kashmiri Question Paper Formatting",
+  description:
+  "Professional Urdu and Kashmiri question paper formatting with clean PDFs, trusted service, and fast 1 day delivery.",
     url: "https://dtp-gules.vercel.app",
     siteName: "Vintage DTP",
     images: [
