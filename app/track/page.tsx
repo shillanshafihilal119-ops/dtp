@@ -43,7 +43,16 @@ export default function TrackPage() {
 
   return (
     <main className="min-h-screen p-4 sm:p-10">
-      <h1 className="text-3xl font-bold mb-6">
+      {loading && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="bg-black border border-yellow-500 p-6 rounded-lg">
+      <p className="text-yellow-400 text-lg">
+        Searching Request...
+      </p>
+    </div>
+  </div>
+)}
+      <h1 className="text-3xl text-yellow-500 font-bold mb-6">
         Track Your Paper
       </h1>
 
@@ -80,7 +89,7 @@ export default function TrackPage() {
 
         <button
   disabled={loading}
-  className="bg-black text-white px-5 py-3 rounded disabled:opacity-50"
+  className="bg-yellow-500 text-black bold px-5 py-3 rounded disabled:opacity-50"
 >
   {loading ? "Searching..." : "Search"}
 </button>

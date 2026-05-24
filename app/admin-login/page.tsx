@@ -38,7 +38,7 @@ export default function AdminLoginPage() {
           className="border p-3 rounded w-full"
         />
 
-        <button className="bg-black text-white p-3 rounded w-full disabled:opacity-50">
+        <button className="bg-yellow-500 text-black bold p-3 rounded w-full disabled:opacity-50">
           Login
         </button>
       </form>

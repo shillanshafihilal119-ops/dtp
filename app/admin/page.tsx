@@ -11,6 +11,7 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [paymentFilter, setPaymentFilter] = useState("All");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -39,18 +40,21 @@ export default function AdminPage() {
   id: number,
   status: string
 ) {
+  setLoading(true);
   const { error } = await supabase
     .from("paper_requests")
     .update({ status })
     .eq("id", id);
 
   if (error) {
+    setLoading(false);
     console.log("SUPABASE ERROR:", error);
 
     alert(
       "Failed to update status"
     );
   } else {
+    setLoading(false);
     fetchRequests();
   }
 }
@@ -59,6 +63,7 @@ async function uploadPreview(
   id: number,
   file: File
 ) {
+  setLoading(true);
   const fileName = `${Date.now()}-${file.name}`;
 
   const { data, error } =
@@ -83,8 +88,11 @@ async function uploadPreview(
   if (updateError) {
     console.log(updateError);
     alert("Failed to save preview");
+    setLoading(false);
+
   } else {
     alert("Preview uploaded");
+    setLoading(false);
     fetchRequests();
   }
 }
@@ -93,6 +101,7 @@ async function uploadPreview(
   id: number,
   file: File
 ) {
+  setLoading(true);
   const fileName = `${Date.now()}-${file.name}`;
 
   const { data, error } =
@@ -104,7 +113,7 @@ async function uploadPreview(
     console.log(error);
 
     alert("PDF upload failed");
-
+    setLoading(false);
     return;
   }
 
@@ -123,9 +132,12 @@ async function uploadPreview(
     alert(
       "Failed to save PDF"
     );
+
+    setLoading(false);
+
   } else {
     alert("PDF uploaded");
-
+    setLoading(false);
     fetchRequests();
   }
 }
@@ -134,6 +146,7 @@ async function uploadPreview(
   id: number,
   payment_status: string
 ) {
+  setLoading(true);
   const { error } =
     await supabase
       .from("paper_requests")
@@ -143,12 +156,14 @@ async function uploadPreview(
       .eq("id", id);
 
   if (error) {
+    setLoading(false);
     console.log(error);
 
     alert(
       "Failed to update payment"
     );
   } else {
+    setLoading(false);
     fetchRequests();
   }
 }
@@ -159,7 +174,9 @@ async function uploadPreview(
   );
 
   if (!confirmed) return;
-
+  
+  setLoading(true);
+  
   const { error } = await supabase
     .from("paper_requests")
     .delete()
@@ -168,9 +185,13 @@ async function uploadPreview(
   if (error) {
     alert("Failed to delete request");
     console.log(error);
+    setLoading(false);
+
   } else {
     alert("Request deleted");
 
+    setLoading(false);
+    
     fetchRequests();
   }
 }
@@ -191,8 +212,17 @@ async function uploadPreview(
 
   return (
     <main className="min-h-screen p-4 sm:p-10">
+      {loading && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="bg-black border border-yellow-500 p-6 rounded-lg">
+      <p className="text-yellow-400 text-lg">
+        Working...
+      </p>
+    </div>
+  </div>
+)}
       <div className="flex justify-between items-center mb-8">
-  <h1 className="text-3xl font-bold">
+  <h1 className="text-3xl text-yellow-500 font-bold">
     Admin Dashboard
   </h1>
 
@@ -223,7 +253,7 @@ async function uploadPreview(
 <select
   value={statusFilter}
   onChange={(e) => setStatusFilter(e.target.value)}
-    className="border p-3 rounded mb-4 block w-full max-w-xs bg-grey text-white focus:bg-white focus:text-black"
+    className="border p-3 rounded mb-4 block w-full max-w-xs bg-grey text-white focus:bg-yellow-500 focus:text-black"
 >
   <option value="All">All Statuses</option>
   <option value="Submitted">Submitted</option>
@@ -239,7 +269,7 @@ async function uploadPreview(
       e.target.value
     )
   }
-   className="border p-3 rounded mb-4 block w-full max-w-xs bg-grey text-white focus:bg-white focus:text-black"
+   className="border p-3 rounded mb-4 block w-full max-w-xs bg-grey text-white focus:bg-yellow-500 focus:text-black"
 >
   <option value="All">
     All Payments
@@ -298,7 +328,7 @@ async function uploadPreview(
   .map((request) => (
           <div
             key={request.id}
-             className="border p-3 rounded w-full bg-grey text-white focus:bg-white focus:text-black mb-6 block"
+             className="border p-3 rounded w-full bg-grey text-white focus:bg-yellow-500 focus:text-black mb-6 block"
           >
             <h3 className="text-2xl font-bold mb-6">
               {request.teacher_name}
@@ -369,7 +399,7 @@ async function uploadPreview(
             e.target.value
             )
         }
-             className="border p-3 rounded mb-4 block w-full max-w-xs bg-grey text-white focus:bg-white focus:text-black">
+             className="border p-3 rounded mb-4 block w-full max-w-xs bg-grey text-white focus:bg-yellow-500 focus:text-black">
             
             <option>
             Submitted
@@ -405,7 +435,7 @@ async function uploadPreview(
         e.target.value
       )
     }
-     className="border p-3 rounded mb-4 block w-full max-w-xs bg-grey text-white focus:bg-white focus:text-black">
+     className="border p-3 rounded mb-4 block w-full max-w-xs bg-grey text-white focus:bg-yellow-500 focus:text-black">
   
     <option value="Unpaid">
       Unpaid
@@ -421,7 +451,7 @@ async function uploadPreview(
             onClick={() =>
             deleteRequest(request.id)
             }
-            className="bg-black text-white p-3 rounded w-full disabled:opacity-50"
+            className="bg-red-500 text-white p-3 rounded w-full disabled:opacity-50"
             >
             Delete
             </button>

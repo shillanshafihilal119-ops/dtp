@@ -25,8 +25,8 @@ export default function Home() {
   ) => {
     e.preventDefault();
     const nameRegex = /^[A-Za-z\u0600-\u06FF\s]+$/;
-const phoneRegex = /^[0-9]{10,12}$/;
-const marksRegex = /^[0-9]+$/;
+    const phoneRegex = /^[0-9]{10,12}$/;
+    const marksRegex = /^[0-9]+$/;
 
 if (
   !teacherName ||
@@ -43,6 +43,8 @@ if (
   alert("Please fill all required fields and upload the paper image.");
   return;
 }
+
+setLoading(true);
 
 if (!nameRegex.test(teacherName)) {
   alert("Teacher name should contain letters only.");
@@ -124,8 +126,17 @@ if (file) {
 
   return (
     <main className="min-h-screen p-4 sm:p-10">
-      <h1 className="text-3xl font-bold mb-6">
-        Urdu / Kashmiri Paper Formatting Service
+      {loading && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="bg-black border border-yellow-500 p-6 rounded-lg">
+      <p className="text-yellow-400 text-lg">
+        Processing Request...
+      </p>
+    </div>
+  </div>
+)}
+      <h1 className="text-3xl text-yellow-500 font-bold mb-6">
+        Kashmiri and Urdu Paper Writing Service
       </h1>
 
       <a
@@ -275,7 +286,7 @@ if (file) {
         <button
   type="submit"
   disabled={loading}
-  className="bg-black text-white p-3 rounded w-full disabled:opacity-50"
+  className="bg-yellow-500 text-black bold p-3 rounded w-full disabled:opacity-50"
 >
   {loading ? "Submitting..." : "Submit Request"}
 </button>
