@@ -13,48 +13,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title:
-    "Vintage DTP | Urdu & Kashmiri Paper Formatting",
+  title: "Vintage DTP | Urdu & Kashmiri Paper Formatting",
 
   description:
-    "Professional Urdu and Kashmiri paper formatting service for schools, teachers, and coaching centers.",
-
-  keywords: [
-    "Urdu papers",
-    "Kashmiri papers",
-    "DTP",
-    "Question papers",
-    "Exam papers",
-  ],
-
-  authors: [
-    {
-      name: "Vintage DTP",
-    },
-  ],
+    "Get professional Urdu and Kashmiri question papers formatted accurately and delivered within 1 day for schools, teachers, and coaching centers.",
 
   openGraph: {
-    title:
-      "Vintage DTP",
-
+    title: "Vintage DTP | Urdu & Kashmiri Paper Formatting",
     description:
-      "Professional Urdu and Kashmiri paper formatting service.",
-
+      "Professional Urdu and Kashmiri question paper formatting with 1 day delivery for schools, teachers, and coaching centers.",
+    url: "https://dtp-gules.vercel.app",
+    siteName: "Vintage DTP",
+    images: [
+      {
+        url: "/opengraph-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Vintage DTP Urdu and Kashmiri Paper Formatting",
+      },
+    ],
     type: "website",
-
-    url:
-      "https://dtp-gules.vercel.app",
   },
 
   twitter: {
-    card:
-      "summary_large_image",
-
-    title:
-      "Vintage DTP",
-
+    card: "summary_large_image",
+    title: "Vintage DTP | Urdu & Kashmiri Paper Formatting",
     description:
-      "Professional Urdu and Kashmiri paper formatting service.",
+      "Professional Urdu and Kashmiri question paper formatting with 1 day delivery.",
+    images: ["/opengraph-image.jpg"],
   },
 };
 
