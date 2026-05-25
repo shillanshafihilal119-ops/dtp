@@ -41,7 +41,7 @@ export default function TrackPage() {
   }
 
   return (
-    <main className="min-h-screen p-4 sm:p-10">
+    <main className="min-h-screen px-6 py-12 sm:px-10 animate-fade-in">
       {loading && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-black border border-yellow-500 p-6 rounded-lg">
@@ -52,13 +52,23 @@ export default function TrackPage() {
         </div>
       )}
 
-      <h1 className="text-3xl text-yellow-500 font-bold mb-6">
-        Track Your Paper
-      </h1>
+      <section className="mx-auto mb-10 max-w-6xl">
+  <p className="mb-4 inline-block rounded-full border border-yellow-500/40 px-4 py-2 text-sm text-yellow-400">
+    Track Request
+  </p>
+
+  <h1 className="text-4xl sm:text-5xl font-bold text-yellow-500">
+    Track Your Paper
+  </h1>
+
+  <p className="mt-4 max-w-2xl text-gray-400">
+    Enter your phone number or request ID to check status, preview, payment, and final PDF delivery.
+  </p>
+</section>
 
       <form
         onSubmit={searchRequests}
-        className="flex flex-col sm:flex-row gap-3 mb-8"
+        className="mx-auto mb-10 flex max-w-6xl flex-col gap-3 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 sm:flex-row"
       >
         <input
           type="text"
