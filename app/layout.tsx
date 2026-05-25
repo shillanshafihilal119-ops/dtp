@@ -32,6 +32,8 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-black text-white flex flex-col">
 
+        <script src="https://checkout.razorpay.com/v1/checkout.js" />
+
         <header className="border-b border-yellow-500/20 bg-black/90">
 
           <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
