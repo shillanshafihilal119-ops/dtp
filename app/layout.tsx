@@ -12,38 +12,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   title:
-  "Vintage DTP | Urdu & Kashmiri Question Paper Formatting",
+    "Vintage DTP | Urdu & Kashmiri Question Paper Formatting",
 
-description:
-  "Get Urdu and Kashmiri question papers professionally formatted with accurate layout, clean PDF delivery, and fast 1 day turnaround for teachers and schools.",
-
-  openGraph: {
-   title:
-  "Vintage DTP | Urdu & Kashmiri Question Paper Formatting",
   description:
-  "Professional Urdu and Kashmiri question paper formatting with clean PDFs, trusted service, and fast 1 day delivery.",
-    url: "https://dtp-gules.vercel.app",
-    siteName: "Vintage DTP",
-    images: [
-      {
-        url: "/opengraph-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Vintage DTP Urdu and Kashmiri Paper Formatting",
-      },
-    ],
-    type: "website",
-  },
-
-  twitter: {
-    card: "summary_large_image",
-    title: "Vintage DTP | Urdu & Kashmiri Paper Formatting",
-    description:
-      "Professional Urdu and Kashmiri question paper formatting with 1 day delivery.",
-    images: ["/opengraph-image.jpg"],
-  },
+    "Professional Urdu and Kashmiri question paper formatting with clean PDFs and fast delivery.",
 };
 
 export default function RootLayout({
@@ -54,9 +28,167 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-screen bg-black text-white flex flex-col">
+
+        <header className="border-b border-yellow-500/20 bg-black/90">
+
+          <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+
+            <a
+  href="/"
+  className="group"
+>
+  <h1 className="text-2xl font-bold text-yellow-500 transition group-hover:text-yellow-400">
+    Vintage DTP
+  </h1>
+
+  <p className="text-sm text-gray-400">
+    Urdu & Kashmiri Paper Formatting
+  </p>
+</a>
+
+            <nav className="flex items-center gap-8">
+
+              <a
+                href="/"
+                className="hover:text-yellow-400 transition"
+              >
+                Home
+              </a>
+
+              <a
+                href="/track"
+                className="hover:text-yellow-400 transition"
+              >
+                Track
+              </a>
+
+              <a
+                href="/admin-login"
+                className="bg-yellow-500 text-black px-4 py-2 rounded font-semibold hover:bg-yellow-400 transition"
+              >
+                Admin Login
+              </a>
+
+            </nav>
+
+          </div>
+
+        </header>
+
+        <main className="flex-1 animate-fade-in">
+          {children}
+        </main>
+
+        <footer className="border-t border-yellow-500/20 py-12">
+
+          <div className="max-w-6xl mx-auto px-6">
+
+            <div className="grid gap-10 md:grid-cols-3">
+
+              <div>
+                <h3 className="text-2xl font-bold text-yellow-500 mb-4">
+                  Vintage DTP
+                </h3>
+
+                <p className="text-gray-300 leading-8">
+                  Professional Urdu and Kashmiri question paper formatting service for teachers, schools, and coaching centers.
+                </p>
+              </div>
+
+              <div>
+
+                <h3 className="text-yellow-500 font-bold mb-4">
+                  Quick Links
+                </h3>
+
+                <ul className="space-y-3">
+
+                  <li>
+                    <a
+                      href="/#request-form"
+                      className="hover:text-yellow-400 transition"
+                    >
+                      Submit Request
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="/track"
+                      className="hover:text-yellow-400 transition"
+                    >
+                      Track Request
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="https://wa.me/917889410756"
+                      target="_blank"
+                      className="hover:text-yellow-400 transition"
+                    >
+                      Contact on WhatsApp
+                    </a>
+                  </li>
+
+                </ul>
+
+              </div>
+
+              <div>
+
+                <h3 className="text-yellow-500 font-bold mb-4">
+                  Contact
+                </h3>
+
+                <ul className="space-y-3">
+
+                  <li>
+                    <a
+                      href="https://wa.me/917889410756"
+                      target="_blank"
+                      className="hover:text-yellow-400 transition"
+                    >
+                      WhatsApp: 7889410756
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="mailto:shillanshafihilal119@gmail.com"
+                      className="hover:text-yellow-400 transition"
+                    >
+                      Email:
+                      shillanshafihilal119@gmail.com
+                    </a>
+                  </li>
+
+                  <li>
+                    Delivery: 1 Day
+                  </li>
+
+                </ul>
+
+              </div>
+
+            </div>
+
+            <div className="mt-10 border-t border-zinc-800 pt-6">
+
+              <p className="text-center text-sm text-gray-500">
+                © 2026 Vintage DTP. All rights reserved.
+              </p>
+
+            </div>
+
+          </div>
+
+        </footer>
+
+      </body>
     </html>
   );
 }

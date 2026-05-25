@@ -214,7 +214,7 @@ async function uploadPreview(
   }
 
   return (
-    <main className="min-h-screen p-4 sm:p-10">
+    <main className="min-h-screen p-4 sm:p-10 animate-fade-in">
       {loading && (
   <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
     <div className="bg-black border border-yellow-500 p-6 rounded-lg">
