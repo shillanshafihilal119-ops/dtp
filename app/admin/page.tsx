@@ -122,9 +122,10 @@ async function uploadPreview(
     await supabase
       .from("paper_requests")
       .update({
-        final_pdf_url: data.path,
-        status: "Ready",
-      })
+  final_pdf_url: data.path,
+  status: "Ready",
+  correction_notes: null,
+})
       .eq("id", id);
 
   if (updateError) {
