@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 export default function TrackPage() {
+
   const [phone, setPhone] = useState("");
   const [requestId, setRequestId] = useState("");
   const [requests, setRequests] = useState<any[]>([]);
@@ -12,6 +19,7 @@ export default function TrackPage() {
   const [correctionNotes, setCorrectionNotes] = useState("");
   const [correctionLoading, setCorrectionLoading] = useState(false);
   const [correctionText, setCorrectionText] = useState("");
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   async function searchRequests(e: React.FormEvent) {
     e.preventDefault();
@@ -66,6 +74,128 @@ async function submitCorrection(id: number) {
     setCorrectionText("");
 
     window.location.reload();
+  }
+}
+
+async function payNow(request: any) {
+  try {
+    setPaymentLoading(true);
+
+    const orderRes = await fetch(
+      "/api/create-order",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+          amount: 49,
+        }),
+      }
+    );
+
+    const order =
+      await orderRes.json();
+
+    const options = {
+
+      key:
+        process.env
+          .NEXT_PUBLIC_RAZORPAY_KEY_ID,
+
+      amount:
+        order.amount,
+
+      currency:
+        order.currency,
+
+      name:
+        "Vintage DTP",
+
+      description:
+        "Question Paper Formatting",
+
+      order_id:
+        order.id,
+
+      handler:
+        async function (
+          response: any
+        ) {
+
+        const verifyRes =
+          await fetch(
+          "/api/verify-payment",
+
+          {
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+  ...response,
+  requestId: request.id,
+}),
+          }
+        );
+
+        const verify =
+          await verifyRes.json();
+
+        if (
+          verify.success
+        ) {
+
+          alert(
+          "Payment Successful"
+          );
+
+          window.location.reload();
+
+        } else {
+
+          alert(
+          "Payment verification failed"
+          );
+
+        }
+
+      },
+
+      theme: {
+        color:
+          "#eab308",
+      },
+    };
+
+    const razorpay =
+      new window.Razorpay(
+        options
+      );
+
+    razorpay.open();
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert(
+      "Payment failed"
+    );
+
+  } finally {
+
+    setPaymentLoading(
+      false
+    );
+
   }
 }
 
@@ -357,13 +487,13 @@ disabled:cursor-not-allowed
   request.status !== "In Progress" && (
     <div className="mt-8 flex flex-col items-center">
       <p className="mb-4 text-lg font-bold text-yellow-500">
-        Formatted Preview
+        Final Paper Preview
       </p>
 
       <div className="group relative overflow-hidden rounded-2xl border border-yellow-500/20 bg-black p-2 max-w-md w-full">
         <img
           src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/paper-previews/${request.preview_url}`}
-          alt="Formatted Preview"
+          alt="Final Paper Preview"
           className="w-full rounded-xl transition-all duration-700 group-hover:scale-105"
         />
       </div>
@@ -385,23 +515,13 @@ disabled:cursor-not-allowed
                     <div className="mt-4 space-y-1 text-sm">
                       <p>Amount: ₹49</p>
                       <p>Request ID: {request.request_id}</p>
-                      <p>
-                        UPI ID:
-                        shillanshafihilal119@okhdfcbank
-                      </p>
-                      <p>
-                        After payment, send screenshot on WhatsApp.
-                      </p>
-
-                      <a
-                        href={`https://wa.me/917889410756?text=${encodeURIComponent(
-                          `I have completed the payment for my paper request. My Request ID is ${request.request_id}.`
-                        )}`}
-                        target="_blank"
-                        className="inline-block rounded bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-500"
-                      >
-                        Send Payment Screenshot
-                      </a>
+                      <button
+  onClick={() => payNow(request)}
+  disabled={paymentLoading}
+  className="mt-4 rounded bg-yellow-500 px-5 py-3 font-bold text-black hover:bg-yellow-400 disabled:opacity-50"
+>
+  {paymentLoading ? "Opening Payment..." : "Pay ₹49 Now"}
+</button>
                     </div>
                   </div>
                 )}
