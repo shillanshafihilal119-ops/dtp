@@ -291,7 +291,6 @@ export default function ArchivePage() {
                     .update({
                       status: "In Progress",
                       final_pdf_url: null,
-                      payment_status: "Unpaid",
                       correction_notes: "Teacher requested revision",
                     })
                     .eq("id", request.id);

@@ -210,102 +210,45 @@ export default function AdminPage() {
   });
 
   return (
+  <>
+    {showDeleteModal && (
+      <div className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/80 p-6 pt-24">
+        <div className="w-full max-w-md rounded-2xl border border-red-500/20 bg-zinc-950 p-8 shadow-2xl">
+          <p className="text-2xl font-bold text-red-400">
+            Delete Request?
+          </p>
+
+          <p className="mt-3 text-gray-400">
+            This action cannot be undone.
+          </p>
+
+          <div className="mt-8 flex gap-4">
+            <button
+              onClick={() => {
+                setShowDeleteModal(false);
+                setDeleteId(null);
+              }}
+              className="flex-1 rounded border border-zinc-700 py-3"
+            >
+              Cancel
+            </button>
+
+            <button
+              onClick={() => {
+                if (deleteId) {
+                  deleteRequest(deleteId);
+                }
+              }}
+              className="flex-1 rounded bg-red-600 py-3 font-bold text-white"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
     <main className="min-h-screen px-6 py-12 sm:px-10 animate-fade-in">
-      {showDeleteModal && (
-
-<div className="
-fixed
-inset-0
-z-50
-flex
-items-center
-justify-center
-bg-black/80
-p-6
-">
-
-<div className="
-w-full
-max-w-md
-rounded-2xl
-border
-border-red-500/20
-bg-zinc-950
-p-8
-">
-
-<p className="
-text-2xl
-font-bold
-text-red-400
-">
-Delete Request?
-</p>
-
-<p className="
-mt-3
-text-gray-400
-">
-This action cannot be undone.
-</p>
-
-<div className="
-mt-8
-flex
-gap-4
-">
-
-<button
-
-onClick={()=>{
-setShowDeleteModal(false);
-setDeleteId(null);
-}}
-
-className="
-flex-1
-rounded
-border
-border-zinc-700
-py-3
-"
-
->
-
-Cancel
-
-</button>
-
-<button
-
-onClick={()=>{
-if(deleteId){
-deleteRequest(deleteId);
-}
-}}
-
-className="
-flex-1
-rounded
-bg-red-600
-py-3
-font-bold
-text-white
-"
-
->
-
-Delete
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-)}
       {loading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
           <div className="rounded-lg border border-yellow-500 bg-black p-6">
@@ -703,6 +646,11 @@ transition
 
                 <button
                   onClick={() => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+
   setDeleteId(request.id);
   setShowDeleteModal(true);
 }}
@@ -722,5 +670,6 @@ transition
         </div>
       </div>
     </main>
+  </>
   );
 }
