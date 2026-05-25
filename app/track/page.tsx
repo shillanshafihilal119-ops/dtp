@@ -43,9 +43,9 @@ export default function TrackPage() {
   return (
     <main className="min-h-screen px-6 py-12 sm:px-10 animate-fade-in">
       {loading && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-black border border-yellow-500 p-6 rounded-lg">
-            <p className="text-yellow-400 text-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <div className="rounded-lg border border-yellow-500 bg-black p-6">
+            <p className="text-lg text-yellow-400">
               Searching Request...
             </p>
           </div>
@@ -53,18 +53,19 @@ export default function TrackPage() {
       )}
 
       <section className="mx-auto mb-10 max-w-6xl">
-  <p className="mb-4 inline-block rounded-full border border-yellow-500/40 px-4 py-2 text-sm text-yellow-400">
-    Track Request
-  </p>
+        <p className="mb-4 inline-block rounded-full border border-yellow-500/40 px-4 py-2 text-sm text-yellow-400">
+          Track Request
+        </p>
 
-  <h1 className="text-4xl sm:text-5xl font-bold text-yellow-500">
-    Track Your Paper
-  </h1>
+        <h1 className="text-4xl font-bold text-yellow-500 sm:text-5xl">
+          Track Your Paper
+        </h1>
 
-  <p className="mt-4 max-w-2xl text-gray-400">
-    Enter your phone number or request ID to check status, preview, payment, and final PDF delivery.
-  </p>
-</section>
+        <p className="mt-4 max-w-2xl text-gray-400">
+          Enter your phone number or request ID to check status, preview,
+          payment, and final PDF delivery.
+        </p>
+      </section>
 
       <form
         onSubmit={searchRequests}
@@ -78,7 +79,7 @@ export default function TrackPage() {
             setPhone(e.target.value.replace(/\D/g, ""))
           }
           maxLength={12}
-          className="border p-3 rounded w-full"
+          className="w-full rounded border p-3"
         />
 
         <input
@@ -93,12 +94,12 @@ export default function TrackPage() {
             )
           }
           maxLength={20}
-          className="border p-3 rounded w-full"
+          className="w-full rounded border p-3"
         />
 
         <button
           disabled={loading}
-          className="bg-yellow-500 text-black font-bold px-5 py-3 rounded disabled:opacity-50"
+          className="rounded bg-yellow-500 px-5 py-3 font-bold text-black disabled:opacity-50"
         >
           {loading ? "Searching..." : "Search"}
         </button>
@@ -106,146 +107,245 @@ export default function TrackPage() {
 
       <div className="grid gap-5">
         {requests.map((request) => {
-          const submitted = [
-            "Submitted",
-            "In Progress",
-            "Ready",
-            "Delivered",
-          ].includes(request.status);
-
-          const started = [
-            "In Progress",
-            "Ready",
-            "Delivered",
-          ].includes(request.status);
-
-          const ready = ["Ready", "Delivered"].includes(
-            request.status
-          );
-
-          const paid = request.payment_status === "Paid";
-
-          const delivered = request.status === "Delivered" && request.payment_status === "Paid";
+          const delivered =
+            request.status === "Delivered" &&
+            request.payment_status === "Paid";
 
           return (
             <div
               key={request.id}
-              className="border p-5 rounded"
+              className="mx-auto w-full max-w-6xl rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 shadow-lg"
             >
-              <p>Class: {request.class}</p>
-              <p>Subject: {request.subject}</p>
-              <p>Session: {request.session}</p>
-              <p>Examination: {request.examination}</p>
-              <p>Marks: {request.marks}</p>
-              <p>Duration: {request.duration}</p>
-              <p>Medium: {request.medium}</p>
-              <p>Status: {request.status}</p>
-              <p>School: {request.school}</p>
+              <div className="grid gap-4 sm:grid-cols-2">
 
-              <div className="mt-6 border p-4 rounded">
-                <h3 className="font-bold mb-4">
+                <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+  <p className="text-xs uppercase tracking-wide text-gray-500">
+    School
+  </p>
+
+  <p className="mt-1 font-semibold text-white">
+    {request.school}
+  </p>
+</div>
+
+<div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+  <p className="text-xs uppercase tracking-wide text-gray-500">
+    Class
+  </p>
+
+  <p className="mt-1 font-semibold text-white">
+    {request.class}
+  </p>
+</div>
+
+<div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+  <p className="text-xs uppercase tracking-wide text-gray-500">
+    Subject
+  </p>
+
+  <p className="mt-1 font-semibold text-white">
+    {request.subject}
+  </p>
+</div>
+
+<div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+  <p className="text-xs uppercase tracking-wide text-gray-500">
+    Session
+  </p>
+
+  <p className="mt-1 font-semibold text-white">
+    {request.session}
+  </p>
+</div>
+
+<div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+  <p className="text-xs uppercase tracking-wide text-gray-500">
+    Examination
+  </p>
+
+  <p className="mt-1 font-semibold text-white">
+    {request.examination}
+  </p>
+</div>
+
+<div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+  <p className="text-xs uppercase tracking-wide text-gray-500">
+    Marks
+  </p>
+
+  <p className="mt-1 font-semibold text-white">
+    {request.marks}
+  </p>
+</div>
+
+<div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+  <p className="text-xs uppercase tracking-wide text-gray-500">
+    Duration
+  </p>
+
+  <p className="mt-1 font-semibold text-white">
+    {request.duration}
+  </p>
+</div>
+
+<div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+  <p className="text-xs uppercase tracking-wide text-gray-500">
+    Medium
+  </p>
+
+  <p className="mt-1 font-semibold text-white">
+    {request.medium}
+  </p>
+</div>
+                <p>
+                  <b>Status:</b>{" "}
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-bold ${
+                      request.status === "Submitted"
+                        ? "bg-blue-500 text-white"
+                        : request.status === "In Progress"
+                        ? "bg-yellow-500 text-black"
+                        : request.status === "Ready"
+                        ? "bg-orange-500 text-black"
+                        : "bg-green-500 text-black"
+                    }`}
+                  >
+                    {request.status}
+                  </span>
+                </p>
+
+                <p>
+                  <b>Payment:</b>{" "}
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-bold ${
+                      request.payment_status === "Paid"
+                        ? "bg-green-500 text-black"
+                        : "bg-red-500 text-white"
+                    }`}
+                  >
+                    {request.payment_status}
+                  </span>
+                </p>
+              </div>
+
+              <div className="mt-8">
+                <h3 className="mb-8 text-xl font-bold text-white">
                   Delivery Progress
                 </h3>
 
-                <div className="space-y-3">
-                  <p
-                    className={
-                      submitted
-                        ? "text-green-500"
-                        : "text-gray-400"
-                    }
-                  >
-                    {submitted
-                      ? "✓ Request Submitted"
-                      : "○ Request Submitted"}
-                  </p>
+                <div className="relative flex items-center justify-between">
+                  <div className="absolute left-0 top-5 h-1 w-full rounded-full bg-zinc-800" />
 
-                  <p
-                    className={
-                      started
-                        ? "text-green-500"
-                        : "text-gray-400"
-                    }
-                  >
-                    {started
-                      ? "✓ Work Started"
-                      : "○ Work Started"}
-                  </p>
+                  <div
+                    className={`absolute left-0 top-5 h-1 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-400 transition-all duration-[1800ms] ease-out ${
+                      request.status === "Submitted"
+                        ? "w-[0%]"
+                        : request.status === "In Progress"
+                        ? "w-[33%]"
+                        : request.status === "Ready"
+                        ? "w-[66%]"
+                        : "w-full"
+                    }`}
+                  />
 
-                  <p
-                    className={
-                      ready
-                        ? "text-green-500"
-                        : "text-gray-400"
-                    }
-                  >
-                    {ready
-                      ? "✓ Final PDF Ready"
-                      : "○ Final PDF Ready"}
-                  </p>
+                  {[
+                    "Submitted",
+                    "In Progress",
+                    "Ready",
+                    "Delivered",
+                  ].map((step) => {
+                    const active =
+                      step === request.status ||
+                      request.status === "Delivered" ||
+                      (request.status === "Ready" &&
+                        step !== "Delivered") ||
+                      (request.status === "In Progress" &&
+                        (step === "Submitted" ||
+                          step === "In Progress"));
 
-                  <p
-                    className={
-                      paid
-                        ? "text-green-500"
-                        : "text-gray-400"
-                    }
-                  >
-                    {paid
-                      ? "✓ Payment Completed"
-                      : "○ Payment Completed"}
-                  </p>
+                    return (
+                      <div
+                        key={step}
+                        className="relative z-10 flex flex-col items-center"
+                      >
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-full border-4 font-bold transition-all duration-700 ${
+                            active
+                              ? "border-yellow-500 bg-yellow-500 text-black"
+                              : "border-zinc-700 bg-black text-gray-500"
+                          }`}
+                        >
+                          {active ? "✓" : "•"}
+                        </div>
 
-                  <p
-                    className={
-                      delivered
-                        ? "text-green-500"
-                        : "text-gray-400"
-                    }
-                  >
-                    {delivered
-                      ? "✓ Delivered"
-                      : "○ Delivered"}
-                  </p>
+                        <p className="mt-3 text-center text-xs">
+                          {step}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
               {request.preview_url && (
-                <div className="mt-4">
-                  <p className="mb-2 font-semibold">
-                    Paper Preview
-                  </p>
+  <div className="mt-8 flex flex-col items-center">
 
-                  <img
-                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/paper-previews/${request.preview_url}`}
-                    alt="Paper Preview"
-                    className="mt-4 rounded border w-full max-w-md"
-                  />
-                </div>
-              )}
+    <p className="mb-4 text-lg font-bold text-yellow-500">
+      Paper Preview
+    </p>
+
+    <div className="group relative overflow-hidden rounded-2xl border border-yellow-500/20 bg-black p-2 max-w-md w-full">
+
+      <img
+        src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/paper-previews/${request.preview_url}`}
+        alt="Paper Preview"
+        className="
+        w-full
+        rounded-xl
+        transition-all
+        duration-700
+        group-hover:scale-105
+        "
+      />
+
+      <div
+        className="
+        absolute
+        inset-0
+        bg-gradient-to-t
+        from-black/50
+        to-transparent
+        opacity-0
+        group-hover:opacity-100
+        transition
+        duration-500
+        "
+      />
+
+    </div>
+
+  </div>
+)}
 
               {request.final_pdf_url &&
                 request.payment_status !== "Paid" && (
-                  <div className="mt-4 border p-4 rounded bg-yellow-50 text-black">
-                    <p className="font-semibold">
-                      Your paper is ready.
+                  <div className="mt-6 rounded-2xl border border-yellow-500/30 bg-zinc-950 p-6">
+                    <p className="text-xl font-bold text-yellow-500">
+                      Your paper is ready
                     </p>
 
-                    <p className="mt-2">
-                      Preview is available above. Complete payment to unlock the final PDF.
+                    <p className="mt-2 text-gray-400">
+                      Preview is available above. Complete payment to unlock
+                      the final PDF.
                     </p>
 
-                    <div className="mt-4">
+                    <div className="mt-4 space-y-1 text-sm">
                       <p>Amount: ₹49</p>
-
+                      <p>Request ID: {request.request_id}</p>
                       <p>
-                        Request ID: {request.request_id}
+                        UPI ID:
+                        shillanshafihilal119@okhdfcbank
                       </p>
-
-                      <p>
-                        UPI ID: shillanshafihilal119@okhdfcbank
-                      </p>
-
                       <p>
                         After payment, send screenshot on WhatsApp.
                       </p>
@@ -255,7 +355,7 @@ export default function TrackPage() {
                           `I have completed the payment for my paper request. My Request ID is ${request.request_id}.`
                         )}`}
                         target="_blank"
-                        className="inline-block mt-3 bg-green-600 text-white px-4 py-2 rounded"
+                        className="inline-block rounded bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-500"
                       >
                         Send Payment Screenshot
                       </a>
@@ -263,37 +363,52 @@ export default function TrackPage() {
                   </div>
                 )}
 
-              {request.final_pdf_url &&
-                request.payment_status === "Paid" && (
-                  <a
-                    href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`}
-                    target="_blank"
-                    onClick={async () => {
-                      await supabase
-                        .from("paper_requests")
-                        .update({
-                          status: "Delivered",
-                        })
-                        .eq("id", request.id);
+              {request.payment_status === "Paid" &&
+                request.final_pdf_url && (
+                  <div className="mt-6 rounded-2xl border border-green-500/30 bg-zinc-950 p-6">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-xl font-bold text-green-400">
+                          ✓ Final Paper Ready
+                        </p>
 
-                      setRequests((prev) =>
-                        prev.map((item) =>
-                          item.id === request.id
-                            ? {
-                                ...item,
-                                status: "Delivered",
-                              }
-                            : item
-                        )
-                      );
-                    }}
-                    className="inline-block bg-yellow-500 text-black px-4 py-2 rounded mt-3 font-semibold"
-                  >
-                    Download Final Paper
-                  </a>
+                        <p className="mt-2 text-gray-400">
+                          Payment verified. Download your final formatted PDF
+                          below.
+                        </p>
+                      </div>
+
+                      <a
+                        href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`}
+                        target="_blank"
+                        onClick={async () => {
+                          await supabase
+                            .from("paper_requests")
+                            .update({
+                              status: "Delivered",
+                            })
+                            .eq("id", request.id);
+
+                          setRequests((prev) =>
+                            prev.map((item) =>
+                              item.id === request.id
+                                ? {
+                                    ...item,
+                                    status: "Delivered",
+                                  }
+                                : item
+                            )
+                          );
+                        }}
+                        className="rounded-xl bg-green-500 px-5 py-3 font-semibold text-black transition hover:bg-green-400"
+                      >
+                        Download Final PDF
+                      </a>
+                    </div>
+                  </div>
                 )}
 
-              {request.status === "Delivered" && (
+              {delivered && (
                 <>
                   <textarea
                     placeholder="Need corrections? Write here..."
@@ -301,64 +416,42 @@ export default function TrackPage() {
                     onChange={(e) =>
                       setCorrectionNotes(e.target.value)
                     }
-                    className="border p-3 rounded w-full mt-4"
+                    className="mt-4 w-full rounded border p-3"
                   />
 
                   <button
                     onClick={async () => {
+                      if (!correctionNotes.trim()) {
+                        alert(
+                          "Please write correction details first."
+                        );
+                        return;
+                      }
 
-  if (
-    !correctionNotes.trim()
-  ) {
-    alert(
-      "Please write correction details first."
-    );
+                      setCorrectionLoading(true);
 
-    return;
-  }
+                      await supabase
+                        .from("paper_requests")
+                        .update({
+                          status: "In Progress",
+                          payment_status: "Unpaid",
+                          final_pdf_url: null,
+                          correction_notes: correctionNotes,
+                        })
+                        .eq("request_id", request.request_id);
 
-  setCorrectionLoading(
-    true
-  );
+                      setCorrectionLoading(false);
 
-  await supabase
-    .from(
-      "paper_requests"
-    )
+                      alert("Correction request submitted.");
 
-    .update({
-      status:
-        "In Progress",
-
-      payment_status:
-        "Unpaid",
-
-      final_pdf_url:
-        null,
-
-      correction_notes:
-        correctionNotes,
-    })
-
-    .eq(
-      "request_id",
-      request.request_id
-    );
-
-  setCorrectionLoading(
-    false
-  );
-
-  alert(
-    "Correction request submitted."
-  );
-
-  location.reload();
-}}
+                      location.reload();
+                    }}
                     disabled={correctionLoading}
-                    className="bg-yellow-500 text-black px-4 py-2 rounded mt-3 disabled:opacity-50">
+                    className="mt-3 rounded bg-yellow-500 px-4 py-2 text-black disabled:opacity-50"
+                  >
                     {correctionLoading
-                    ? "Submitting..." : "Request Correction"}
+                      ? "Submitting..."
+                      : "Request Correction"}
                   </button>
                 </>
               )}
@@ -367,7 +460,7 @@ export default function TrackPage() {
         })}
 
         {searched && requests.length === 0 && (
-          <p className="mt-6 text-red-500">
+          <p className="mx-auto mt-6 max-w-6xl text-red-500">
             No request found. Please check your phone number or request ID.
           </p>
         )}

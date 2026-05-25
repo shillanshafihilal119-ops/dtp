@@ -227,7 +227,7 @@ export default function Home() {
               required
               value={medium}
               onChange={(e) => setMedium(e.target.value)}
-              className="rounded border bg-black p-3 text-white focus:bg-yellow-500 focus:text-black"
+              className="rounded border bg-grey p-3 text-white focus:bg-yellow-500 focus:text-black"
             >
               <option value="">Select Medium</option>
               <option value="Urdu">Urdu</option>
