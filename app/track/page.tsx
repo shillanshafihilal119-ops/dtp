@@ -109,6 +109,94 @@ export default function TrackPage() {
             <p>Medium: {request.medium}</p>
             <p>Status: {request.status}</p>
             <p>School: {request.school}</p>
+
+            <div className="mt-6 border p-4 rounded">
+  <h3 className="font-bold mb-4">
+    Delivery Progress
+  </h3>
+
+  <div className="space-y-3">
+
+    <p
+      className={
+        request.status ===
+          "Submitted" ||
+        request.status ===
+          "In Progress" ||
+        request.status ===
+          "Ready" ||
+        request.status ===
+          "Delivered"
+
+          ? "text-green-500"
+
+          : "text-gray-400"
+      }
+    >
+      ✓ Request Submitted
+    </p>
+
+    <p
+      className={
+        request.status ===
+          "In Progress" ||
+        request.status ===
+          "Ready" ||
+        request.status ===
+          "Delivered"
+
+          ? "text-green-500"
+
+          : "text-gray-400"
+      }
+    >
+      ✓ Work Started
+    </p>
+
+    <p
+      className={
+        request.status ===
+          "Ready" ||
+        request.status ===
+          "Delivered"
+
+          ? "text-green-500"
+
+          : "text-gray-400"
+      }
+    >
+      ✓ Final PDF Ready
+    </p>
+
+    <p
+      className={
+        request.payment_status ===
+        "Paid"
+
+          ? "text-green-500"
+
+          : "text-gray-400"
+      }
+    >
+      ✓ Payment Completed
+    </p>
+
+    <p
+      className={
+        request.status ===
+        "Delivered"
+
+          ? "text-green-500"
+
+          : "text-gray-400"
+      }
+    >
+      ✓ Delivered
+    </p>
+
+  </div>
+</div>
+
             {request.preview_url && (
   <div className="mt-4">
     <p className="mb-2 font-semibold">
