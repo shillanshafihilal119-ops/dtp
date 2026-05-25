@@ -18,6 +18,15 @@ export default function TrackPage() {
   const [correctionNotes, setCorrectionNotes] = useState("");
   const [correctionLoading, setCorrectionLoading] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [toast, setToast] = useState("");
+
+function showToast(message: string) {
+  setToast(message);
+
+  setTimeout(() => {
+    setToast("");
+  }, 3000);
+}
 
   async function searchRequests(e: React.FormEvent) {
     e.preventDefault();
@@ -86,7 +95,7 @@ export default function TrackPage() {
           const verify = await verifyRes.json();
 
           if (verify.success) {
-            alert("Payment Successful");
+            showToast("Payment successful. Final PDF unlocked.");
 
             setRequests((prev) =>
               prev.map((item) =>
@@ -120,6 +129,14 @@ export default function TrackPage() {
 
   return (
     <main className="min-h-screen px-6 py-12 sm:px-10 animate-fade-in">
+
+      {toast && (
+  <div className="fixed right-6 top-6 z-[9999] rounded-2xl border border-green-500/20 bg-zinc-950 p-5 shadow-xl">
+    <p className="font-bold text-green-400">✓ Success</p>
+    <p className="mt-1 text-sm text-gray-300">{toast}</p>
+  </div>
+)}
+
       {loading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
           <div className="rounded-lg border border-yellow-500 bg-black p-6">
@@ -443,7 +460,7 @@ export default function TrackPage() {
 
                       setCorrectionNotes("");
 
-                      alert("Correction request submitted.");
+                      showToast("Correction request submitted successfully.");
                     }}
                     disabled={correctionLoading}
                     className="mt-3 rounded bg-yellow-500 px-4 py-2 text-black disabled:opacity-50"
