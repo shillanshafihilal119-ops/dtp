@@ -22,9 +22,12 @@ export default function ArchivePage() {
     const isAdmin = localStorage.getItem("isAdmin");
 
     if (isAdmin !== "true") {
-      router.push("/admin-login");
-      return;
-    }
+  alert("Please login first.");
+
+  router.push("/admin-login");
+
+  return;
+}
 
     fetchDelivered();
   }, [router]);

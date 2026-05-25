@@ -11,6 +11,7 @@ export default function TrackPage() {
   const [loading, setLoading] = useState(false);
   const [correctionNotes, setCorrectionNotes] = useState("");
   const [correctionLoading, setCorrectionLoading] = useState(false);
+  const [correctionText, setCorrectionText] = useState("");
 
   async function searchRequests(e: React.FormEvent) {
     e.preventDefault();
@@ -39,6 +40,34 @@ export default function TrackPage() {
       setRequests(data || []);
     }
   }
+
+async function submitCorrection(id: number) {
+  if (!correctionText.trim()) {
+    alert("Enter correction details");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("paper_requests")
+    .update({
+  correction_notes: correctionText,
+  status: "In Progress",
+  final_pdf_url: null,
+  preview_url: null,
+  payment_status: "Unpaid",
+})
+    .eq("id", id);
+
+  if (error) {
+    alert("Failed to submit correction");
+  } else {
+    alert("Correction submitted");
+
+    setCorrectionText("");
+
+    window.location.reload();
+  }
+}
 
   return (
     <main className="min-h-screen px-6 py-12 sm:px-10 animate-fade-in">
@@ -82,6 +111,19 @@ export default function TrackPage() {
           className="w-full rounded border p-3"
         />
 
+<div className="flex items-center justify-center px-2">
+
+<p className="
+text-sm
+font-semibold
+text-white
+whitespace-nowrap
+">
+OR
+</p>
+
+</div>
+
         <input
           type="text"
           placeholder="Enter Request ID"
@@ -98,12 +140,36 @@ export default function TrackPage() {
         />
 
         <button
-          disabled={loading}
-          className="rounded bg-yellow-500 px-5 py-3 font-bold text-black disabled:opacity-50"
-        >
-          {loading ? "Searching..." : "Search"}
-        </button>
+disabled={
+loading ||
+(!phone.trim() &&
+!requestId.trim())
+}
+
+className="
+rounded
+bg-yellow-500
+px-5
+py-3
+font-bold
+text-black
+transition
+hover:bg-yellow-400
+disabled:opacity-50
+disabled:cursor-not-allowed
+"
+>
+
+{loading
+? "Searching..."
+: "Search"}
+
+</button>
       </form>
+
+      <p className="mx-auto -mt-6 mb-8 max-w-6xl text-sm text-gray-400">
+  You can search with either your phone number or your Request ID. Both are not required.
+</p>
 
       <div className="grid gap-5">
         {requests.map((request) => {
@@ -287,45 +353,22 @@ export default function TrackPage() {
                 </div>
               </div>
 
-              {request.preview_url && (
-  <div className="mt-8 flex flex-col items-center">
+             {request.preview_url &&
+  request.status !== "In Progress" && (
+    <div className="mt-8 flex flex-col items-center">
+      <p className="mb-4 text-lg font-bold text-yellow-500">
+        Formatted Preview
+      </p>
 
-    <p className="mb-4 text-lg font-bold text-yellow-500">
-      Paper Preview
-    </p>
-
-    <div className="group relative overflow-hidden rounded-2xl border border-yellow-500/20 bg-black p-2 max-w-md w-full">
-
-      <img
-        src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/paper-previews/${request.preview_url}`}
-        alt="Paper Preview"
-        className="
-        w-full
-        rounded-xl
-        transition-all
-        duration-700
-        group-hover:scale-105
-        "
-      />
-
-      <div
-        className="
-        absolute
-        inset-0
-        bg-gradient-to-t
-        from-black/50
-        to-transparent
-        opacity-0
-        group-hover:opacity-100
-        transition
-        duration-500
-        "
-      />
-
+      <div className="group relative overflow-hidden rounded-2xl border border-yellow-500/20 bg-black p-2 max-w-md w-full">
+        <img
+          src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/paper-previews/${request.preview_url}`}
+          alt="Formatted Preview"
+          className="w-full rounded-xl transition-all duration-700 group-hover:scale-105"
+        />
+      </div>
     </div>
-
-  </div>
-)}
+  )}
 
               {request.final_pdf_url &&
                 request.payment_status !== "Paid" && (

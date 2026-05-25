@@ -23,11 +23,19 @@ export default function AdminPage() {
       Date.now() - Number(loginTime) > 24 * 60 * 60 * 1000;
 
     if (isAdmin !== "true" || expired) {
-      localStorage.removeItem("isAdmin");
-      localStorage.removeItem("adminLoginTime");
-      router.push("/admin-login");
-      return;
-    }
+  localStorage.removeItem("isAdmin");
+  localStorage.removeItem("adminLoginTime");
+
+  alert(
+    expired
+      ? "Admin session expired. Please login again."
+      : "Please login first."
+  );
+
+  router.push("/admin-login");
+
+  return;
+}
 
     fetchRequests();
   }, [router]);
@@ -453,17 +461,60 @@ export default function AdminPage() {
                       />
                     ) : (
                       <>
-                        <p className="font-semibold text-green-400">
-                          Final PDF already uploaded
-                        </p>
+                        <p className="font-semibold text-green-400 mb-4">
+Final PDF already uploaded
+</p>
 
-                        <a
-                          href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`}
-                          target="_blank"
-                          className="mt-3 inline-block text-blue-400 underline"
-                        >
-                          View Final PDF
-                        </a>
+<div className="flex flex-col gap-3">
+
+<a
+href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`}
+target="_blank"
+
+className="
+rounded
+bg-blue-600
+px-4
+py-3
+text-center
+font-semibold
+text-white
+transition
+hover:bg-blue-500
+"
+>
+View Final PDF
+</a>
+
+<a
+  href={`https://wa.me/91${request.phone}?text=${encodeURIComponent(
+    `Vintage DTP
+
+Hello ${request.teacher_name},
+
+Your paper formatting work is completed.
+
+Request ID: ${request.request_id}
+
+Subject: ${request.subject}
+Class: ${request.class}
+
+Track your paper here:
+https://dtp-gules.vercel.app/track
+
+Payment Status:
+${request.payment_status || "Unpaid"}
+
+Thank you for choosing Vintage DTP.`
+  )}`}
+  target="_blank"
+  className="rounded bg-green-600 px-4 py-3 text-center font-semibold text-white transition hover:bg-green-500"
+>
+  Notify Customer on WhatsApp
+</a>
+
+</div>
+
                       </>
                     )}
                   </div>

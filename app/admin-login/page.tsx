@@ -5,43 +5,64 @@ import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const router = useRouter();
 
   function login(e: React.FormEvent) {
     e.preventDefault();
 
+    setLoading(true);
+
     if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
       localStorage.setItem("isAdmin", "true");
       localStorage.setItem(
-      "adminLoginTime",
-      Date.now().toString()
+        "adminLoginTime",
+        Date.now().toString()
       );
-      
+
       router.push("/admin");
     } else {
+      setLoading(false);
       alert("Wrong password");
     }
   }
 
   return (
-    <main className="min-h-screen p-4 sm:p-10">
-      <h1 className="text-3xl font-bold mb-6">
-        Admin Login
-      </h1>
+    <main className="min-h-screen px-6 py-12 sm:px-10 animate-fade-in">
+      <section className="mx-auto flex min-h-[70vh] max-w-6xl items-center justify-center">
+        <div className="w-full max-w-md rounded-2xl border border-yellow-500/20 bg-zinc-950 p-8 shadow-lg">
+          <p className="mb-4 inline-block rounded-full border border-yellow-500/40 px-4 py-2 text-sm text-yellow-400">
+            Admin Access
+          </p>
 
-      <form onSubmit={login} className="flex flex-col gap-4 w-full max-w-md">
-        <input
-          type="password"
-          placeholder="Enter admin password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="border p-3 rounded w-full"
-        />
+          <h1 className="text-4xl font-bold text-yellow-500">
+            Admin Login
+          </h1>
 
-        <button className="bg-yellow-500 text-black bold p-3 rounded w-full disabled:opacity-50">
-          Login
-        </button>
-      </form>
+          <p className="mt-3 text-gray-400">
+            Enter your admin password to manage requests, uploads, payments, and archive.
+          </p>
+
+          <form onSubmit={login} className="mt-8 flex flex-col gap-4">
+            <input
+              required
+              type="password"
+              placeholder="Enter admin password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="rounded border bg-black p-3 text-white focus:bg-white focus:text-black"
+            />
+
+            <button
+              disabled={loading}
+              className="rounded bg-yellow-500 p-3 font-bold text-black transition hover:bg-yellow-400 disabled:opacity-50"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+          </form>
+        </div>
+      </section>
     </main>
   );
 }
