@@ -15,6 +15,8 @@ import {
 export default function ArchivePage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
+  const [searchError, setSearchError] = useState("");
 
   const router = useRouter();
 
@@ -22,12 +24,10 @@ export default function ArchivePage() {
     const isAdmin = localStorage.getItem("isAdmin");
 
     if (isAdmin !== "true") {
-  alert("Please login first.");
-
-  router.push("/admin-login");
-
-  return;
-}
+      alert("Please login first.");
+      router.push("/admin-login");
+      return;
+    }
 
     fetchDelivered();
   }, [router]);
@@ -46,54 +46,58 @@ export default function ArchivePage() {
     }
   }
 
-  const filteredRequests = requests.filter((request: any) => {
-    const searchText = search.toLowerCase();
+  function handleSearch() {
+    if (!search.trim()) {
+      setActiveSearch("");
+      setSearchError("Please enter a Request ID, teacher name, phone number, school, or subject.");
+      return;
+    }
 
-    return (
-      request.request_id?.toLowerCase().includes(searchText) ||
-      request.teacher_name?.toLowerCase().includes(searchText) ||
-      request.school?.toLowerCase().includes(searchText) ||
-      request.phone?.toLowerCase().includes(searchText) ||
-      request.subject?.toLowerCase().includes(searchText)
-    );
-  });
+    setActiveSearch(search.trim());
+    setSearchError("");
+  }
+
+  function clearSearch() {
+    setSearch("");
+    setActiveSearch("");
+    setSearchError("");
+  }
+
+  const filteredRequests = activeSearch
+    ? requests.filter((request: any) => {
+        const searchText = activeSearch.toLowerCase();
+
+        return (
+          request.request_id?.toLowerCase().includes(searchText) ||
+          request.teacher_name?.toLowerCase().includes(searchText) ||
+          request.school?.toLowerCase().includes(searchText) ||
+          request.phone?.toLowerCase().includes(searchText) ||
+          request.subject?.toLowerCase().includes(searchText)
+        );
+      })
+    : requests;
 
   const monthlyRevenue = Object.values(
+    requests.reduce((acc: any, request: any) => {
+      const month = new Date(request.created_at).toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      });
 
-requests.reduce(
-(acc: any, request: any) => {
+      if (!acc[month]) {
+        acc[month] = {
+          month,
+          revenue: 0,
+        };
+      }
 
-const month =
-new Date(
-request.created_at
-).toLocaleString(
-"default",
-{
-month: "short",
-year: "numeric",
-}
-);
+      if (request.payment_status === "Paid") {
+        acc[month].revenue += 49;
+      }
 
-if (!acc[month]) {
-acc[month] = {
-month,
-revenue: 0,
-};
-}
-
-if (
-request.payment_status === "Paid"
-) {
-acc[month].revenue += 49;
-}
-
-return acc;
-
-},
-{}
-)
-
-);
+      return acc;
+    }, {})
+  );
 
   return (
     <main className="min-h-screen px-6 py-12 sm:px-10 animate-fade-in">
@@ -122,122 +126,58 @@ return acc;
         </div>
 
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
+            <p className="text-sm text-gray-400">Delivered</p>
+            <p className="mt-2 text-3xl font-bold text-green-400">
+              {requests.length}
+            </p>
+          </div>
 
-<div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
-<p className="text-sm text-gray-400">
-Delivered
-</p>
+          <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
+            <p className="text-sm text-gray-400">Paid</p>
+            <p className="mt-2 text-3xl font-bold text-yellow-400">
+              {requests.filter((r) => r.payment_status === "Paid").length}
+            </p>
+          </div>
 
-<p className="mt-2 text-3xl font-bold text-green-400">
-{requests.filter(
-(r) => r.status === "Delivered"
-).length}
-</p>
-</div>
+          <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
+            <p className="text-sm text-gray-400">Corrections</p>
+            <p className="mt-2 text-3xl font-bold text-orange-400">
+              {requests.filter((r) => r.correction_notes).length}
+            </p>
+          </div>
 
-<div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
-<p className="text-sm text-gray-400">
-Paid
-</p>
+          <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
+            <p className="text-sm text-gray-400">Revenue</p>
+            <p className="mt-2 text-3xl font-bold text-emerald-400">
+              ₹{requests.filter((r) => r.payment_status === "Paid").length * 49}
+            </p>
+          </div>
 
-<p className="mt-2 text-3xl font-bold text-yellow-400">
-{
-requests.filter(
-(r) =>
-r.payment_status === "Paid"
-).length
-}
-</p>
-</div>
+          <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
+            <p className="text-sm text-gray-400">Total Archive</p>
+            <p className="mt-2 text-3xl font-bold text-blue-400">
+              {requests.length}
+            </p>
+          </div>
+        </div>
 
-<div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
-<p className="text-sm text-gray-400">
-Corrections
-</p>
+        <div className="mb-8 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6">
+          <h3 className="mb-6 text-2xl font-bold text-yellow-500">
+            Monthly Revenue
+          </h3>
 
-<p className="mt-2 text-3xl font-bold text-orange-400">
-{
-requests.filter(
-(r) =>
-r.correction_notes
-).length
-}
-</p>
-</div>
-
-<div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
-<p className="text-sm text-gray-400">
-Revenue
-</p>
-
-<p className="mt-2 text-3xl font-bold text-emerald-400">
-₹{
-requests.filter(
-(r) =>
-r.payment_status === "Paid"
-).length * 49
-}
-</p>
-</div>
-
-<div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
-<p className="text-sm text-gray-400">
-Total Archive
-</p>
-
-<p className="mt-2 text-3xl font-bold text-blue-400">
-{requests.length}
-</p>
-</div>
-
-</div>
-
-<div className="
-mb-8
-rounded-2xl
-border
-border-yellow-500/20
-bg-zinc-950
-p-6
-">
-
-<h3 className="
-mb-6
-text-2xl
-font-bold
-text-yellow-500
-">
-Monthly Revenue
-</h3>
-
-<div className="h-72">
-
-<ResponsiveContainer
-width="100%"
-height="100%"
->
-
-<BarChart
-data={monthlyRevenue}
->
-
-<XAxis dataKey="month" />
-
-<YAxis />
-
-<Tooltip />
-
-<Bar
-dataKey="revenue"
-/>
-
-</BarChart>
-
-</ResponsiveContainer>
-
-</div>
-
-</div>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyRevenue}>
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="revenue" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
         <div className="mb-8 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6">
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -245,14 +185,50 @@ dataKey="revenue"
               type="text"
               placeholder="Search delivered work"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setSearchError("");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSearch();
+                }
+              }}
               className="w-full rounded border p-3"
             />
 
-            <button className="rounded bg-yellow-500 px-5 py-3 font-semibold text-black hover:bg-yellow-400">
+            <button
+              type="button"
+              onClick={handleSearch}
+              className="rounded bg-yellow-500 px-5 py-3 font-semibold text-black hover:bg-yellow-400"
+            >
               Search
             </button>
+
+            {(activeSearch || searchError) && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="rounded border border-zinc-700 px-5 py-3 font-semibold text-white hover:border-yellow-500"
+              >
+                Clear
+              </button>
+            )}
           </div>
+
+          {activeSearch && (
+            <p className="mt-4 text-sm text-gray-400">
+              Showing results for:{" "}
+              <span className="text-yellow-400">{activeSearch}</span>
+            </p>
+          )}
+
+          {searchError && (
+            <div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/5 p-5">
+              <p className="font-bold text-red-400">⚠ Search Required</p>
+              <p className="mt-2 text-sm text-gray-400">{searchError}</p>
+            </div>
+          )}
         </div>
 
         <div className="space-y-6">
@@ -329,10 +305,32 @@ dataKey="revenue"
             </div>
           ))}
 
-          {filteredRequests.length === 0 && (
-            <p className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 text-gray-400">
-              No delivered requests found.
-            </p>
+          {activeSearch && filteredRequests.length === 0 && (
+            <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
+              <p className="text-xl font-bold text-red-400">
+                ⚠ No delivered requests found
+              </p>
+
+              <p className="mt-3 text-gray-400">
+                No archive record matched your search.
+              </p>
+
+              <p className="mt-2 text-sm text-gray-500">
+                Try checking the spelling, phone number, subject, teacher name, or Request ID.
+              </p>
+            </div>
+          )}
+
+          {!activeSearch && requests.length === 0 && (
+            <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-8 text-center">
+              <p className="text-xl font-bold text-yellow-500">
+                No delivered requests yet
+              </p>
+
+              <p className="mt-2 text-gray-400">
+                Delivered work will appear here after customers download their final PDF.
+              </p>
+            </div>
           )}
         </div>
       </div>

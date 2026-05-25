@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const router = useRouter();
 
@@ -24,7 +25,7 @@ export default function AdminLoginPage() {
       router.push("/admin");
     } else {
       setLoading(false);
-      alert("Wrong password");
+      setError("Wrong password. Please try again.");
     }
   }
 
@@ -40,9 +41,38 @@ export default function AdminLoginPage() {
             Admin Login
           </h1>
 
-          <p className="mt-3 text-gray-400">
+          <p className="mt-3 text-gray-400 mb-6">
             Enter your admin password to manage requests, uploads, payments, and archive.
           </p>
+
+{error && (
+
+<div className="
+rounded-xl
+border
+border-red-500/30
+bg-red-500/10
+p-4
+">
+
+<p className="
+font-semibold
+text-red-400
+">
+⚠ Login Failed
+</p>
+
+<p className="
+mt-1
+text-sm
+text-red-300
+">
+{error}
+</p>
+
+</div>
+
+)}
 
           <form onSubmit={login} className="mt-8 flex flex-col gap-4">
             <input
@@ -50,7 +80,10 @@ export default function AdminLoginPage() {
               type="password"
               placeholder="Enter admin password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+  setPassword(e.target.value);
+  setError("");
+}}
               className="rounded border bg-black p-3 text-white focus:bg-white focus:text-black"
             />
 

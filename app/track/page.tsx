@@ -503,9 +503,42 @@ disabled:cursor-not-allowed
         })}
 
         {searched && requests.length === 0 && (
-          <p className="mx-auto mt-6 max-w-6xl text-red-500">
-            No request found. Please check your phone number or request ID.
-          </p>
+          <div className="
+mx-auto
+mt-10
+max-w-xl
+rounded-2xl
+border
+border-red-500/20
+bg-red-500/5
+p-8
+text-center
+">
+
+<p className="
+text-xl
+font-bold
+text-red-400
+">
+⚠ Request Not Found
+</p>
+
+<p className="
+mt-3
+text-gray-400
+">
+We could not find any request matching the phone number or Request ID entered.
+</p>
+
+<p className="
+mt-2
+text-sm
+text-gray-500
+">
+Please verify your details and try again.
+</p>
+
+</div>
         )}
       </div>
     </main>

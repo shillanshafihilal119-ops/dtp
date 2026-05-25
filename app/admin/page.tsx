@@ -11,6 +11,8 @@ export default function AdminPage() {
   const [paymentFilter, setPaymentFilter] = useState("All");
   const [correctionFilter, setCorrectionFilter] = useState("All");
   const [loading, setLoading] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const router = useRouter();
 
@@ -156,29 +158,27 @@ export default function AdminPage() {
   }
 
   async function deleteRequest(id: number) {
-    const confirmed = confirm(
-      "Are you sure you want to delete this request?"
-    );
+  setLoading(true);
 
-    if (!confirmed) return;
+  const { error } = await supabase
+    .from("paper_requests")
+    .delete()
+    .eq("id", id);
 
-    setLoading(true);
+  setLoading(false);
 
-    const { error } = await supabase
-      .from("paper_requests")
-      .delete()
-      .eq("id", id);
+  if (error) {
+    console.log(error);
+    alert("Failed to delete request");
+  } else {
+    setDeleteId(null);
+    setShowDeleteModal(false);
 
-    setLoading(false);
+    alert("Request deleted");
 
-    if (error) {
-      console.log(error);
-      alert("Failed to delete request");
-    } else {
-      alert("Request deleted");
-      fetchRequests();
-    }
+    fetchRequests();
   }
+}
 
   const filteredRequests = requests.filter((request: any) => {
     const searchText = search.toLowerCase();
@@ -211,6 +211,101 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen px-6 py-12 sm:px-10 animate-fade-in">
+      {showDeleteModal && (
+
+<div className="
+fixed
+inset-0
+z-50
+flex
+items-center
+justify-center
+bg-black/80
+p-6
+">
+
+<div className="
+w-full
+max-w-md
+rounded-2xl
+border
+border-red-500/20
+bg-zinc-950
+p-8
+">
+
+<p className="
+text-2xl
+font-bold
+text-red-400
+">
+Delete Request?
+</p>
+
+<p className="
+mt-3
+text-gray-400
+">
+This action cannot be undone.
+</p>
+
+<div className="
+mt-8
+flex
+gap-4
+">
+
+<button
+
+onClick={()=>{
+setShowDeleteModal(false);
+setDeleteId(null);
+}}
+
+className="
+flex-1
+rounded
+border
+border-zinc-700
+py-3
+"
+
+>
+
+Cancel
+
+</button>
+
+<button
+
+onClick={()=>{
+if(deleteId){
+deleteRequest(deleteId);
+}
+}}
+
+className="
+flex-1
+rounded
+bg-red-600
+py-3
+font-bold
+text-white
+"
+
+>
+
+Delete
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+)}
       {loading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
           <div className="rounded-lg border border-yellow-500 bg-black p-6">
@@ -607,7 +702,10 @@ transition
                 )}
 
                 <button
-                  onClick={() => deleteRequest(request.id)}
+                  onClick={() => {
+  setDeleteId(request.id);
+  setShowDeleteModal(true);
+}}
                   className="mt-6 w-full rounded bg-red-600 p-3 font-semibold text-white hover:bg-red-500"
                 >
                   Delete Request
