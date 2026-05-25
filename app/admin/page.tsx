@@ -12,6 +12,7 @@ export default function AdminPage() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [paymentFilter, setPaymentFilter] = useState("All");
   const [loading, setLoading] = useState(false);
+  const [correctionFilter, setCorrectionFilter] = useState("All");
   const router = useRouter();
 
   useEffect(() => {
@@ -273,6 +274,17 @@ async function uploadPreview(
 </select>
 
 <select
+  value={correctionFilter}
+  onChange={(e) =>
+    setCorrectionFilter(e.target.value)
+  }
+  className="border p-3 rounded mb-4 block w-full max-w-xs bg-grey text-white focus:bg-yellow-500 focus:text-black"
+>
+  <option value="All">All Requests</option>
+  <option value="Corrections">Corrections Only</option>
+</select>
+
+<select
   value={paymentFilter}
   onChange={(e) =>
     setPaymentFilter(
@@ -330,12 +342,17 @@ async function uploadPreview(
   paymentFilter === "All" ||
   request.payment_status ===
     paymentFilter;
-    
+
+  const matchesCorrection =
+    correctionFilter === "All" ||
+    request.correction_notes;
+
   return (
-    matchesSearch &&
-    matchesStatus &&
-    matchesPayment
-  );
+  matchesSearch &&
+  matchesStatus &&
+  matchesPayment &&
+  matchesCorrection
+);
 })
 
 

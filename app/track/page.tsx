@@ -209,43 +209,81 @@ export default function TrackPage() {
   Download Final Paper
 </a>
 )}
-<textarea
-  placeholder="Need corrections? Write here..."
-  value={correctionNotes}
-  onChange={(e) =>
-    setCorrectionNotes(
-      e.target.value
-    )
-  }
-  className="border p-3 rounded w-full mt-4"
-/>
+{request.status === "Delivered" && (
+  <>
+    <textarea
+      placeholder="Need corrections? Write here..."
+      value={correctionNotes}
+      onChange={(e) =>
+        setCorrectionNotes(
+          e.target.value
+        )
+      }
+      className="
+      border
+      p-3
+      rounded
+      w-full
+      mt-4
+      "
+    />
 
-<button
-  onClick={async () => {
-    await supabase
-  .from("paper_requests")
-  .update({
-    status: "In Progress",
-    payment_status: "Unpaid",
-    final_pdf_url: null,
-    correction_notes: correctionNotes,
-  })
-  .eq("request_id", request.request_id);
+    <button
+      onClick={async () => {
+        if (
+          !correctionNotes.trim()
+        ) {
+          alert(
+            "Please write correction details first."
+          );
 
-    location.reload();
-  }}
+          return;
+        }
 
-  className="
-  bg-yellow-500
-  text-black
-  px-4
-  py-2
-  rounded
-  mt-3
-  "
->
-  Request Correction
-</button>
+        await supabase
+          .from(
+            "paper_requests"
+          )
+
+          .update({
+            status:
+              "In Progress",
+
+            payment_status:
+              "Unpaid",
+
+            final_pdf_url:
+              null,
+
+            correction_notes:
+              correctionNotes,
+          })
+
+          .eq(
+            "request_id",
+            request.request_id
+          );
+
+        alert(
+          "Correction request submitted."
+        );
+
+        location.reload();
+      }}
+
+      className="
+      bg-yellow-500
+      text-black
+      px-4
+      py-2
+      rounded
+      mt-3
+      "
+    >
+      Request Correction
+    </button>
+  </>
+)}
 </div>
 ))}
 
