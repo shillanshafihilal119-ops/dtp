@@ -199,6 +199,7 @@ async function uploadPreview(
     const { data, error } = await supabase
       .from("paper_requests")
       .select("*")
+      .neq("status", "Delivered")
       .order("created_at", {
         ascending: false,
       });
@@ -226,20 +227,29 @@ async function uploadPreview(
     Admin Dashboard
   </h1>
 
-  <button
-    onClick={() => {
-      localStorage.removeItem(
-        "isAdmin"
-      );
+  <div className="flex gap-3">
+    <a
+      href="/archive"
+      className="bg-yellow-500 text-black px-4 py-2 rounded"
+    >
+      Archive
+    </a>
 
-      router.push(
-        "/admin-login"
-      );
-    }}
-    className="bg-red-600 text-white px-4 py-2 rounded"
-  >
-    Logout
-  </button>
+    <button
+      onClick={() => {
+        localStorage.removeItem(
+          "isAdmin"
+        );
+
+        router.push(
+          "/admin-login"
+        );
+      }}
+      className="bg-red-600 text-white px-4 py-2 rounded"
+    >
+      Logout
+    </button>
+  </div>
 </div>
 
       <input
@@ -305,7 +315,11 @@ async function uploadPreview(
 
     request.subject
       ?.toLowerCase()
-      .includes(searchText);
+      .includes(searchText) ||
+
+    request.school
+      ?.toLowerCase()
+      .includes(searchText)
 
   const matchesStatus =
     statusFilter === "All" ||
@@ -328,10 +342,34 @@ async function uploadPreview(
   .map((request) => (
           <div
             key={request.id}
-             className="border p-3 rounded w-full bg-grey text-white focus:bg-yellow-500 focus:text-black mb-6 block"
+            className={`border p-3 rounded w-full text-white mb-6 block ${
+            request.correction_notes && (
+            <div className="mb-4">
+            <p className="text-yellow-400 font-semibold">
+            Correction Request
+            </p>
+
+            <p className="text-sm text-gray-300 mt-1">
+            {request.correction_notes}
+            </p>
+        </div>
+        )}
+        
+          }`}
           >
             <h3 className="text-2xl font-bold mb-6">
               {request.teacher_name}
+              {request.correction_notes && (
+              <div className="mb-4">
+              <p className="text-yellow-400 font-semibold">
+              Correction Request
+              </p>
+
+              <p className="text-sm text-gray-300 mt-1">
+              {request.correction_notes}
+              </p>
+            </div>
+            )}
             </h3>
             
             <p className="mb-3 text-sm">
@@ -341,6 +379,10 @@ async function uploadPreview(
             <div className="grid grid-cols-2 gap-2 text-sm mb-4">
   <p>
     <b>Phone:</b> {request.phone}
+  </p>
+
+  <p>
+    <b>School:</b> {request.school}
   </p>
 
   <p>

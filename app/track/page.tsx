@@ -9,6 +9,7 @@ export default function TrackPage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [correctionNotes, setCorrectionNotes] = useState("");
 
   async function searchRequests(e: React.FormEvent) {
   e.preventDefault();
@@ -107,6 +108,7 @@ export default function TrackPage() {
             <p>Duration: {request.duration}</p>
             <p>Medium: {request.medium}</p>
             <p>Status: {request.status}</p>
+            <p>School: {request.school}</p>
             {request.preview_url && (
   <div className="mt-4">
     <p className="mb-2 font-semibold">
@@ -167,32 +169,85 @@ export default function TrackPage() {
 
           {request.final_pdf_url && request.payment_status === "Paid" && (
   <a
-    href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`}
-    target="_blank"
-    onClick={async () => {
-  await supabase
-    .from("paper_requests")
-    .update({ status: "Delivered" })
-    .eq("id", request.id);
+  href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`}
+  target="_blank"
+  onClick={async () => {
+    await supabase
+      .from("paper_requests")
+      .update({
+        status: "Delivered",
+      })
+      .eq(
+        "id",
+        request.id
+      );
 
-  setRequests((prev) =>
-    prev.map((item) =>
-      item.id === request.id
-        ? {
-            ...item,
-            status: "Delivered",
-          }
-        : item
-    )
-  );
-}} 
-    className="text-blue-600 underline block mt-3"
-  >
-    Download Final Paper
-  </a>
+    setRequests((prev) =>
+      prev.map((item) =>
+        item.id === request.id
+          ? {
+              ...item,
+              status:
+                "Delivered",
+            }
+          : item
+      )
+    );
+  }}
+
+  className="
+  inline-block
+  bg-yellow-500
+  text-black
+  px-4
+  py-2
+  rounded
+  mt-3
+  font-semibold
+  "
+>
+  Download Final Paper
+</a>
 )}
-          </div>
-        ))}
+<textarea
+  placeholder="Need corrections? Write here..."
+  value={correctionNotes}
+  onChange={(e) =>
+    setCorrectionNotes(
+      e.target.value
+    )
+  }
+  className="border p-3 rounded w-full mt-4"
+/>
+
+<button
+  onClick={async () => {
+    await supabase
+  .from("paper_requests")
+  .update({
+    status: "In Progress",
+    payment_status: "Unpaid",
+    final_pdf_url: null,
+    correction_notes: correctionNotes,
+  })
+  .eq("request_id", request.request_id);
+
+    location.reload();
+  }}
+
+  className="
+  bg-yellow-500
+  text-black
+  px-4
+  py-2
+  rounded
+  mt-3
+  "
+>
+  Request Correction
+</button>
+</div>
+))}
 
         {searched && requests.length === 0 && (
   <p className="mt-6 text-red-500">

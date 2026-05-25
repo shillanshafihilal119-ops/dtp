@@ -16,6 +16,7 @@ export default function Home() {
   const [instructions, setInstructions] = useState("");
   const submittedBoxRef = useRef<HTMLDivElement | null>(null);
   const [copied, setCopied] = useState(false);
+  const [school, setSchool] = useState("");
 
   const [submittedId, setSubmittedId] = useState("");
 
@@ -32,6 +33,7 @@ export default function Home() {
 
 if (
   !teacherName ||
+  !school ||
   !phone ||
   !studentClass ||
   !subject ||
@@ -93,6 +95,7 @@ if (file) {
       payment_status: "Unpaid",
       request_id: requestId,
       teacher_name: teacherName,
+      school: school,
       phone: phone,
       class: studentClass,
       subject: subject,
@@ -122,6 +125,7 @@ if (file) {
       }, 100);
 
       setTeacherName("");
+      setSchool("");
       setPhone("");
       setStudentClass("");
       setSubject("");
@@ -170,6 +174,17 @@ if (file) {
           setTeacherName(e.target.value)
           }
           className="border p-3 rounded w-full"
+        />
+
+        <input
+        required
+        type="text"
+        placeholder="School Name"
+        value={school}
+        onChange={(e) =>
+        setSchool(e.target.value)
+        }
+        className="border p-3 rounded w-full"
         />
 
         <input
