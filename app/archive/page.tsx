@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import {
   ResponsiveContainer,
@@ -18,19 +17,9 @@ export default function ArchivePage() {
   const [activeSearch, setActiveSearch] = useState("");
   const [searchError, setSearchError] = useState("");
 
-  const router = useRouter();
-
   useEffect(() => {
-    const isAdmin = localStorage.getItem("isAdmin");
-
-    if (isAdmin !== "true") {
-      alert("Please login first.");
-      router.push("/admin-login");
-      return;
-    }
-
     fetchDelivered();
-  }, [router]);
+  }, []);
 
   async function fetchDelivered() {
     const { data, error } = await supabase
@@ -46,10 +35,16 @@ export default function ArchivePage() {
     }
   }
 
+  function getPaidAmount(request: any) {
+    return Number(request.paid_amount || request.total_amount || 0);
+  }
+
   function handleSearch() {
     if (!search.trim()) {
       setActiveSearch("");
-      setSearchError("Please enter a Request ID, teacher name, phone number, school, or subject.");
+      setSearchError(
+        "Please enter a Request ID, teacher name, phone number, school, or subject."
+      );
       return;
     }
 
@@ -77,6 +72,14 @@ export default function ArchivePage() {
       })
     : requests;
 
+  const totalRevenue = requests.reduce((sum: number, request: any) => {
+    if (request.payment_status === "Paid") {
+      return sum + getPaidAmount(request);
+    }
+
+    return sum;
+  }, 0);
+
   const monthlyRevenue = Object.values(
     requests.reduce((acc: any, request: any) => {
       const month = new Date(request.created_at).toLocaleString("default", {
@@ -92,7 +95,7 @@ export default function ArchivePage() {
       }
 
       if (request.payment_status === "Paid") {
-        acc[month].revenue += 49;
+        acc[month].revenue += getPaidAmount(request);
       }
 
       return acc;
@@ -150,7 +153,7 @@ export default function ArchivePage() {
           <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
             <p className="text-sm text-gray-400">Revenue</p>
             <p className="mt-2 text-3xl font-bold text-emerald-400">
-              ₹{requests.filter((r) => r.payment_status === "Paid").length * 49}
+              ₹{totalRevenue}
             </p>
           </div>
 
@@ -194,7 +197,7 @@ export default function ArchivePage() {
                   handleSearch();
                 }
               }}
-              className="w-full rounded border p-3"
+              className="w-full rounded border border-yellow-500/20 bg-black/60 p-3 text-white placeholder:text-gray-500 outline-none focus:border-yellow-500"
             />
 
             <button
@@ -257,6 +260,8 @@ export default function ArchivePage() {
                     className={`rounded-full px-3 py-1 text-xs font-bold ${
                       request.payment_status === "Paid"
                         ? "bg-green-500 text-black"
+                        : request.payment_status === "Partially Paid"
+                        ? "bg-orange-500 text-black"
                         : "bg-red-500 text-white"
                     }`}
                   >
@@ -272,6 +277,9 @@ export default function ArchivePage() {
                 <p><b>Subject:</b> {request.subject}</p>
                 <p><b>Session:</b> {request.session}</p>
                 <p><b>Exam:</b> {request.examination}</p>
+                <p><b>Pages:</b> {request.page_count || 0}</p>
+                <p><b>Total Amount:</b> ₹{request.total_amount || 0}</p>
+                <p><b>Paid Amount:</b> ₹{getPaidAmount(request)}</p>
               </div>
 
               {request.final_pdf_url && (
@@ -289,8 +297,9 @@ export default function ArchivePage() {
                   await supabase
                     .from("paper_requests")
                     .update({
-                      status: "In Progress",
+                      status: "Submitted",
                       final_pdf_url: null,
+                      preview_url: null,
                       correction_notes: "Teacher requested revision",
                     })
                     .eq("id", request.id);

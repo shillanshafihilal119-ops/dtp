@@ -10,23 +10,32 @@ export default function AdminLoginPage() {
 
   const router = useRouter();
 
-  function login(e: React.FormEvent) {
+  async function login(e: React.FormEvent) {
     e.preventDefault();
 
     setLoading(true);
+    setError("");
 
-    if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
-      localStorage.setItem("isAdmin", "true");
-      localStorage.setItem(
-        "adminLoginTime",
-        Date.now().toString()
-      );
+    const res = await fetch("/api/admin-login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ password }),
+    });
 
-      router.push("/admin");
-    } else {
+    const result = await res.json();
+
+    if (!result.success) {
       setLoading(false);
-      setError("Wrong password. Please try again.");
+      setError(result.error || "Wrong password. Please try again.");
+      return;
     }
+
+    localStorage.setItem("isAdmin", "true");
+    localStorage.setItem("adminLoginTime", Date.now().toString());
+
+    router.push("/admin");
   }
 
   return (
@@ -41,38 +50,16 @@ export default function AdminLoginPage() {
             Admin Login
           </h1>
 
-          <p className="mt-3 text-gray-400 mb-6">
+          <p className="mb-6 mt-3 text-gray-400">
             Enter your admin password to manage requests, uploads, payments, and archive.
           </p>
 
-{error && (
-
-<div className="
-rounded-xl
-border
-border-red-500/30
-bg-red-500/10
-p-4
-">
-
-<p className="
-font-semibold
-text-red-400
-">
-⚠ Login Failed
-</p>
-
-<p className="
-mt-1
-text-sm
-text-red-300
-">
-{error}
-</p>
-
-</div>
-
-)}
+          {error && (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+              <p className="font-semibold text-red-400">⚠ Login Failed</p>
+              <p className="mt-1 text-sm text-red-300">{error}</p>
+            </div>
+          )}
 
           <form onSubmit={login} className="mt-8 flex flex-col gap-4">
             <input
@@ -81,10 +68,10 @@ text-red-300
               placeholder="Enter admin password"
               value={password}
               onChange={(e) => {
-  setPassword(e.target.value);
-  setError("");
-}}
-              className="rounded border bg-black p-3 text-white focus:bg-white focus:text-black"
+                setPassword(e.target.value);
+                setError("");
+              }}
+              className="rounded border border-yellow-500/20 bg-black p-3 text-white outline-none focus:border-yellow-500"
             />
 
             <button

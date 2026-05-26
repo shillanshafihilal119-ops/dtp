@@ -19,31 +19,52 @@ export default function TrackPage() {
   const [correctionLoading, setCorrectionLoading] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [toast, setToast] = useState("");
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
-function showToast(message: string) {
-  setToast(message);
+  function showToast(message: string) {
+    setToast(message);
+    setTimeout(() => setToast(""), 3000);
+  }
 
-  setTimeout(() => {
-    setToast("");
-  }, 3000);
-}
+  function getPayableAmount(request: any) {
+    if (
+      request.payment_status === "Partially Paid" &&
+      Number(request.extra_amount_due) > 0
+    ) {
+      return Number(request.extra_amount_due);
+    }
+
+    return Number(request.total_amount || 0);
+  }
 
   async function searchRequests(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!phone && !requestId) {
-      alert("Please enter phone number or request ID.");
+    const cleanPhone = phone.trim();
+    const cleanRequestId = requestId.trim();
+
+    if (!cleanPhone && !cleanRequestId) {
+      alert("Please enter Request ID or phone number.");
       return;
     }
 
     setSearched(false);
     setLoading(true);
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("paper_requests")
       .select("*")
-      .or(`phone.eq.${phone},request_id.eq.${requestId}`)
       .order("created_at", { ascending: false });
+
+    if (cleanRequestId && cleanPhone) {
+      query = query.or(`request_id.eq.${cleanRequestId},phone.eq.${cleanPhone}`);
+    } else if (cleanRequestId) {
+      query = query.eq("request_id", cleanRequestId);
+    } else {
+      query = query.eq("phone", cleanPhone);
+    }
+
+    const { data, error } = await query;
 
     setLoading(false);
     setSearched(true);
@@ -66,18 +87,28 @@ function showToast(message: string) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: 49,
+          requestId: request.id,
         }),
       });
 
       const order = await orderRes.json();
+
+      if (!order.id) {
+        alert(order.error || "Could not create payment order");
+        return;
+      }
+
+      const amountToPay = getPayableAmount(request);
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
         name: "Vintage DTP",
-        description: "Question Paper Formatting",
+        description:
+          request.payment_status === "Partially Paid"
+            ? "Additional pages payment"
+            : "Question Paper Formatting",
         order_id: order.id,
 
         handler: async function (response: any) {
@@ -103,6 +134,11 @@ function showToast(message: string) {
                   ? {
                       ...item,
                       payment_status: "Paid",
+                      paid_page_count: item.page_count || 0,
+                      paid_amount: Number(item.paid_amount || 0) + amountToPay,
+                      extra_pages: 0,
+                      extra_amount_due: 0,
+                      payment_note: null,
                     }
                   : item
               )
@@ -127,15 +163,74 @@ function showToast(message: string) {
     }
   }
 
+  async function downloadFinalPdf(request: any) {
+    try {
+      setDownloadingId(request.id);
+
+      const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`;
+
+      const response = await fetch(fileUrl, {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        alert("Download failed");
+        return;
+      }
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `Vintage-DTP-${request.request_id}.pdf`;
+      link.style.display = "none";
+
+      document.body.appendChild(link);
+      link.click();
+
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      }, 1000);
+
+      if (request.status !== "Delivered") {
+        await supabase
+          .from("paper_requests")
+          .update({
+            status: "Delivered",
+          })
+          .eq("id", request.id);
+
+        setRequests((prev) =>
+          prev.map((item) =>
+            item.id === request.id
+              ? {
+                  ...item,
+                  status: "Delivered",
+                }
+              : item
+          )
+        );
+      }
+
+      showToast("Download started.");
+    } catch (error) {
+      console.log(error);
+      alert("Download failed");
+    } finally {
+      setDownloadingId(null);
+    }
+  }
+
   return (
     <main className="min-h-screen px-6 py-12 sm:px-10 animate-fade-in">
-
       {toast && (
-  <div className="fixed right-6 top-6 z-[9999] rounded-2xl border border-green-500/20 bg-zinc-950 p-5 shadow-xl">
-    <p className="font-bold text-green-400">✓ Success</p>
-    <p className="mt-1 text-sm text-gray-300">{toast}</p>
-  </div>
-)}
+        <div className="fixed right-6 top-6 z-[9999] rounded-2xl border border-green-500/20 bg-zinc-950 p-5 shadow-xl">
+          <p className="font-bold text-green-400">✓ Success</p>
+          <p className="mt-1 text-sm text-gray-300">{toast}</p>
+        </div>
+      )}
 
       {loading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
@@ -155,30 +250,15 @@ function showToast(message: string) {
         </h1>
 
         <p className="mt-4 max-w-2xl text-gray-400">
-          Enter your phone number or request ID to check status, preview,
-          payment, and final PDF delivery.
+          Enter your Request ID for the exact paper. If you do not have it, you
+          can search by phone number and select the correct request.
         </p>
       </section>
 
       <form
         onSubmit={searchRequests}
-        className="mx-auto mb-10 flex max-w-6xl flex-col gap-3 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 sm:flex-row"
+        className="mx-auto mb-6 flex max-w-6xl flex-col gap-3 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 sm:flex-row"
       >
-        <input
-          type="text"
-          placeholder="Enter phone number"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-          maxLength={12}
-          className="w-full rounded border p-3"
-        />
-
-        <div className="flex items-center justify-center px-2">
-          <p className="whitespace-nowrap text-sm font-semibold text-white">
-            OR
-          </p>
-        </div>
-
         <input
           type="text"
           placeholder="Enter Request ID"
@@ -189,7 +269,22 @@ function showToast(message: string) {
             )
           }
           maxLength={20}
-          className="w-full rounded border p-3"
+          className="w-full rounded border border-yellow-500/20 bg-black/60 p-3 text-white placeholder:text-gray-500 outline-none focus:border-yellow-500"
+        />
+
+        <div className="flex items-center justify-center px-2">
+          <p className="whitespace-nowrap text-sm font-semibold text-yellow-400">
+            OR
+          </p>
+        </div>
+
+        <input
+          type="text"
+          placeholder="Enter Phone Number"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+          maxLength={12}
+          className="w-full rounded border border-yellow-500/20 bg-black/60 p-3 text-white placeholder:text-gray-500 outline-none focus:border-yellow-500"
         />
 
         <button
@@ -200,10 +295,26 @@ function showToast(message: string) {
         </button>
       </form>
 
-      <p className="mx-auto -mt-6 mb-8 max-w-6xl text-sm text-gray-400">
-        You can search with either your phone number or your Request ID. Both
-        are not required.
-      </p>
+      <div className="mx-auto mb-8 max-w-6xl rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+        <p className="text-sm text-gray-300">
+          <span className="font-semibold text-yellow-400">Recommended:</span>{" "}
+          Search using your Request ID for the exact paper. Use phone number
+          only if you do not have the Request ID. One phone number may have
+          multiple paper requests.
+        </p>
+      </div>
+
+      {searched && requests.length > 1 && (
+        <div className="mx-auto mb-5 max-w-6xl rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
+          <p className="font-bold text-yellow-500">Multiple Requests Found</p>
+
+          <p className="mt-2 text-sm text-gray-400">
+            We found {requests.length} requests linked to this phone number.
+            Match your paper using the Request ID, subject, class, and details
+            shown below.
+          </p>
+        </div>
+      )}
 
       <div className="grid gap-5">
         {requests.map((request) => {
@@ -211,11 +322,23 @@ function showToast(message: string) {
             request.status === "Delivered" &&
             request.payment_status === "Paid";
 
+          const payableAmount = getPayableAmount(request);
+
           return (
             <div
               key={request.id}
               className="mx-auto w-full max-w-6xl rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 shadow-lg"
             >
+              <div className="mb-6 rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+                <p className="text-xs uppercase tracking-wide text-gray-500">
+                  Request ID
+                </p>
+
+                <p className="mt-1 break-all text-xl font-bold text-yellow-500">
+                  {request.request_id}
+                </p>
+              </div>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 {[
                   ["School", request.school],
@@ -226,6 +349,8 @@ function showToast(message: string) {
                   ["Marks", request.marks],
                   ["Duration", request.duration],
                   ["Medium", request.medium],
+                  ["Final Pages", request.page_count || 0],
+                  ["Total Amount", `₹${request.total_amount || 0}`],
                 ].map(([label, value]) => (
                   <div
                     key={label}
@@ -262,10 +387,12 @@ function showToast(message: string) {
                     className={`rounded-full px-3 py-1 text-xs font-bold ${
                       request.payment_status === "Paid"
                         ? "bg-green-500 text-black"
+                        : request.payment_status === "Partially Paid"
+                        ? "bg-orange-500 text-black"
                         : "bg-red-500 text-white"
                     }`}
                   >
-                    {request.payment_status}
+                    {request.payment_status || "Unpaid"}
                   </span>
                 </p>
               </div>
@@ -295,11 +422,9 @@ function showToast(message: string) {
                       const active =
                         step === request.status ||
                         request.status === "Delivered" ||
-                        (request.status === "Ready" &&
-                          step !== "Delivered") ||
+                        (request.status === "Ready" && step !== "Delivered") ||
                         (request.status === "In Progress" &&
-                          (step === "Submitted" ||
-                            step === "In Progress"));
+                          (step === "Submitted" || step === "In Progress"));
 
                       return (
                         <div
@@ -340,31 +465,87 @@ function showToast(message: string) {
                 </div>
               )}
 
-              {request.final_pdf_url && request.payment_status !== "Paid" && (
-                <div className="mt-6 rounded-2xl border border-yellow-500/30 bg-zinc-950 p-6">
-                  <p className="text-xl font-bold text-yellow-500">
-                    Your paper is ready
-                  </p>
+              {request.payment_status === "Partially Paid" &&
+                request.final_pdf_url && (
+                  <div className="mt-6 rounded-2xl border border-orange-500/30 bg-zinc-950 p-6">
+                    <p className="text-xl font-bold text-orange-400">
+                      Additional Pages Added After Correction
+                    </p>
 
-                  <p className="mt-2 text-gray-400">
-                    Preview is available above. Complete payment to unlock the
-                    final PDF.
-                  </p>
+                    <p className="mt-3 text-gray-300">
+                      Your corrected question paper now contains more pages than
+                      the previously paid final PDF. Your previous payment is
+                      still valid. Only the extra pages are charged.
+                    </p>
 
-                  <div className="mt-4 space-y-1 text-sm">
-                    <p>Amount: ₹49</p>
-                    <p>Request ID: {request.request_id}</p>
+                    <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
+                      <p>
+                        <b>Previously Paid Pages:</b>{" "}
+                        {request.paid_page_count || 0}
+                      </p>
+
+                      <p>
+                        <b>Updated Final Pages:</b> {request.page_count || 0}
+                      </p>
+
+                      <p>
+                        <b>Additional Pages:</b> {request.extra_pages || 0}
+                      </p>
+
+                      <p>
+                        <b>Extra Amount:</b> ₹
+                        {request.extra_amount_due || 0}
+                      </p>
+                    </div>
+
+                    {request.payment_note && (
+                      <p className="mt-4 rounded-xl border border-yellow-500/10 bg-black/40 p-4 text-sm text-gray-300">
+                        {request.payment_note}
+                      </p>
+                    )}
 
                     <button
                       onClick={() => payNow(request)}
                       disabled={paymentLoading}
-                      className="mt-4 rounded bg-yellow-500 px-5 py-3 font-bold text-black hover:bg-yellow-400 disabled:opacity-50"
+                      className="mt-5 rounded bg-yellow-500 px-5 py-3 font-bold text-black hover:bg-yellow-400 disabled:opacity-50"
                     >
-                      {paymentLoading ? "Opening Payment..." : "Pay ₹49 Now"}
+                      {paymentLoading
+                        ? "Opening Payment..."
+                        : `Pay Extra ₹${request.extra_amount_due || 0}`}
                     </button>
                   </div>
-                </div>
-              )}
+                )}
+
+              {request.final_pdf_url &&
+                request.payment_status !== "Paid" &&
+                request.payment_status !== "Partially Paid" && (
+                  <div className="mt-6 rounded-2xl border border-yellow-500/30 bg-zinc-950 p-6">
+                    <p className="text-xl font-bold text-yellow-500">
+                      Your paper is ready
+                    </p>
+
+                    <p className="mt-2 text-gray-400">
+                      Preview is available above. Complete payment to unlock the
+                      final PDF.
+                    </p>
+
+                    <div className="mt-4 space-y-1 text-sm">
+                      <p>Final Pages: {request.page_count || 0}</p>
+                      <p>Amount: ₹{payableAmount}</p>
+                      <p>Request ID: {request.request_id}</p>
+
+                      <button
+                        onClick={() => payNow(request)}
+                        disabled={paymentLoading || payableAmount <= 0}
+                        className="mt-4 rounded bg-yellow-500 px-5 py-3 font-bold text-black hover:bg-yellow-400 disabled:opacity-50"
+                      >
+                        {paymentLoading
+                          ? "Opening Payment..."
+                          : `Pay ₹${payableAmount} Now`}
+                      </button>
+                    </div>
+                  </div>
+                )}
 
               {request.payment_status === "Paid" && request.final_pdf_url && (
                 <div className="mt-6 rounded-2xl border border-green-500/30 bg-zinc-950 p-6">
@@ -380,32 +561,21 @@ function showToast(message: string) {
                       </p>
                     </div>
 
-                    <a
-                      href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`}
-                      target="_blank"
-                      onClick={async () => {
-                        await supabase
-                          .from("paper_requests")
-                          .update({
-                            status: "Delivered",
-                          })
-                          .eq("id", request.id);
-
-                        setRequests((prev) =>
-                          prev.map((item) =>
-                            item.id === request.id
-                              ? {
-                                  ...item,
-                                  status: "Delivered",
-                                }
-                              : item
-                          )
-                        );
-                      }}
-                      className="rounded-xl bg-green-500 px-5 py-3 font-semibold text-black transition hover:bg-green-400"
+                    <button
+                      type="button"
+                      onClick={() => downloadFinalPdf(request)}
+                      disabled={downloadingId === request.id}
+                      className="rounded-xl bg-green-500 px-5 py-3 text-center font-semibold text-black transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      Download Final PDF
-                    </a>
+                      {downloadingId === request.id ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent" />
+                          Downloading...
+                        </span>
+                      ) : (
+                        "Download Final PDF"
+                      )}
+                    </button>
                   </div>
                 </div>
               )}
@@ -420,7 +590,7 @@ function showToast(message: string) {
                     placeholder="Need corrections? Write here..."
                     value={correctionNotes}
                     onChange={(e) => setCorrectionNotes(e.target.value)}
-                    className="mt-4 w-full rounded border bg-black p-3 text-white"
+                    className="mt-4 w-full rounded border border-yellow-500/20 bg-black p-3 text-white placeholder:text-gray-500 outline-none focus:border-yellow-500"
                   />
 
                   <button
@@ -435,7 +605,7 @@ function showToast(message: string) {
                       await supabase
                         .from("paper_requests")
                         .update({
-                          status: "In Progress",
+                          status: "Submitted",
                           final_pdf_url: null,
                           preview_url: null,
                           correction_notes: correctionNotes,
@@ -449,7 +619,7 @@ function showToast(message: string) {
                           item.request_id === request.request_id
                             ? {
                                 ...item,
-                                status: "In Progress",
+                                status: "Submitted",
                                 final_pdf_url: null,
                                 preview_url: null,
                                 correction_notes: correctionNotes,
@@ -479,8 +649,8 @@ function showToast(message: string) {
                   </p>
 
                   <p className="mt-2 text-gray-400">
-                    Your correction request has been received. Work is in
-                    progress.
+                    Your correction request has been received. It is now marked
+                    as Submitted and will be reviewed before work starts.
                   </p>
                 </div>
               )}
@@ -495,12 +665,13 @@ function showToast(message: string) {
             </p>
 
             <p className="mt-3 text-gray-400">
-              We could not find any request matching the phone number or Request
-              ID entered.
+              We could not find any request matching the Request ID or phone
+              number entered.
             </p>
 
             <p className="mt-2 text-sm text-gray-500">
-              Please verify your details and try again.
+              Please check your Request ID first. If unavailable, try the phone
+              number used during submission.
             </p>
           </div>
         )}

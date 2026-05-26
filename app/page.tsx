@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Reveal from "./components/reveal";
 
@@ -20,8 +20,41 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [prices, setPrices] = useState<any[]>([]);
+  const [estimateMedium, setEstimateMedium] = useState("Urdu");
+  const [estimatePages, setEstimatePages] = useState(1);
 
   const submittedBoxRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    fetchPricing();
+  }, []);
+
+  async function fetchPricing() {
+    const { data, error } = await supabase
+      .from("pricing_settings")
+      .select("*")
+      .order("medium", { ascending: true });
+
+    if (error) {
+      console.log(error);
+      setPrices([
+        { medium: "Urdu", rate_per_page: 25 },
+        { medium: "Kashmiri", rate_per_page: 35 },
+        { medium: "English", rate_per_page: 20 },
+      ]);
+    } else {
+      setPrices(data || []);
+    }
+  }
+
+  function getRateByMedium(selectedMedium: string) {
+    const price = prices.find((item) => item.medium === selectedMedium);
+    return Number(price?.rate_per_page || 0);
+  }
+
+  const estimatedRate = getRateByMedium(estimateMedium);
+  const estimatedTotal = Math.max(1, estimatePages || 1) * estimatedRate;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -107,6 +140,28 @@ export default function Home() {
 
     setSubmittedId(requestId);
     setLoading(false);
+
+    const whatsappMessage =
+`Vintage DTP
+
+Your request has been submitted successfully.
+
+Request ID:
+${requestId}
+
+Track your paper:
+https://dtp-gules.vercel.app/track
+
+Keep this Request ID safe.
+
+Thank you for choosing Vintage DTP.`;
+
+window.open(
+`https://wa.me/91${phone}?text=${encodeURIComponent(
+whatsappMessage
+)}`,
+"_blank"
+);
 
     setTimeout(() => {
       submittedBoxRef.current?.scrollIntoView({
@@ -208,6 +263,79 @@ export default function Home() {
             </p>
           </div>
 
+          <div className="mb-10 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 shadow-lg">
+            <div className="mb-6">
+              <p className="text-2xl font-bold text-yellow-500">Pricing</p>
+
+              <p className="mt-2 text-gray-400">
+                Rates are charged per final PDF page. The final amount is
+                calculated after your formatted PDF is uploaded by admin.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              {prices.map((price) => (
+                <div
+                  key={price.medium}
+                  className="rounded-xl border border-yellow-500/10 bg-black/40 p-4"
+                >
+                  <p className="font-semibold text-yellow-400">
+                    {price.medium}
+                  </p>
+
+                  <p className="mt-3 text-3xl font-bold">
+                    ₹{price.rate_per_page}
+                  </p>
+
+                  <p className="text-sm text-gray-400">per page</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 rounded-xl border border-yellow-500/10 bg-black/40 p-5">
+              <p className="mb-4 text-lg font-bold text-yellow-500">
+                Price Estimator
+              </p>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <select
+                  value={estimateMedium}
+                  onChange={(e) => setEstimateMedium(e.target.value)}
+                  className="rounded border border-yellow-500/20 bg-black p-3 text-white outline-none focus:border-yellow-500"
+                >
+                  {prices.map((price) => (
+                    <option key={price.medium} value={price.medium}>
+                      {price.medium}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="number"
+                  min={1}
+                  value={estimatePages}
+                  onChange={(e) =>
+                    setEstimatePages(Math.max(1, Number(e.target.value) || 1))
+                  }
+                  placeholder="Estimated pages"
+                  className="rounded border border-yellow-500/20 bg-black p-3 text-white outline-none focus:border-yellow-500"
+                />
+              </div>
+
+              <div className="mt-5 rounded-xl border border-yellow-500/20 bg-zinc-950 p-5 text-center">
+                <p className="text-sm text-gray-400">Estimated Cost</p>
+
+                <p className="mt-2 text-4xl font-bold text-yellow-500">
+                  ₹{estimatedTotal}
+                </p>
+
+                <p className="mt-3 text-xs text-gray-500">
+                  This is only an estimate. Final amount depends on final PDF page count.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <form
             id="request-form"
             onSubmit={handleSubmit}
@@ -230,9 +358,11 @@ export default function Home() {
               className="rounded border bg-grey p-3 text-white focus:bg-yellow-500 focus:text-black"
             >
               <option value="">Select Medium</option>
-              <option value="Urdu">Urdu</option>
-              <option value="Kashmiri">Kashmiri</option>
-              <option value="English">English</option>
+              {prices.map((price) => (
+                <option key={price.medium} value={price.medium}>
+                  {price.medium}
+                </option>
+              ))}
             </select>
 
             <textarea
@@ -260,28 +390,70 @@ export default function Home() {
             </button>
 
             {submittedId && (
-              <div
-                ref={submittedBoxRef}
-                className="rounded border border-yellow-500/30 bg-black p-4 text-white sm:col-span-2"
-              >
-                <p className="mb-2 text-white">Request submitted!</p>
-                <p className="mb-2 font-bold text-white">
-                  Request ID: {submittedId}
-                </p>
+  <div
+    ref={submittedBoxRef}
+    className="rounded-2xl border border-green-500/30 bg-black/60 p-5 text-white sm:col-span-2"
+  >
+    <p className="text-xl font-bold text-green-400">
+      ✓ Request Submitted Successfully
+    </p>
 
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await navigator.clipboard.writeText(submittedId);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 1500);
-                  }}
-                  className="mt-2 rounded bg-yellow-500 px-4 py-2 text-black"
-                >
-                  {copied ? "Copied!" : "Copy Request ID"}
-                </button>
-              </div>
+    <p className="mt-3 text-sm text-gray-300">
+      Your paper request has been received. Please keep your Request ID safe.
+    </p>
+
+    <div className="mt-5 rounded-xl border border-yellow-500/20 bg-zinc-950 p-4">
+      <p className="text-xs uppercase tracking-wide text-gray-500">
+        Request ID
+      </p>
+
+      <p className="mt-2 break-all text-2xl font-bold text-yellow-500">
+        {submittedId}
+      </p>
+    </div>
+
+    <div className="mt-5 grid gap-3 sm:grid-cols-3">
+      <button
+        type="button"
+        onClick={async () => {
+          await navigator.clipboard.writeText(submittedId);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        }}
+        className="rounded bg-yellow-500 px-4 py-3 font-semibold text-black hover:bg-yellow-400"
+      >
+        {copied ? "Copied!" : "Copy ID"}
+      </button>
+
+      <button
+        type="button"
+        onClick={async () => {
+          await navigator.clipboard.writeText(
+            `https://dtp-gules.vercel.app/track`
+          );
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        }}
+        className="rounded bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-500"
+      >
+        Copy Track Link
+      </button>
+
+      <a
+        href="/track"
+        className="rounded bg-green-600 px-4 py-3 text-center font-semibold text-white hover:bg-green-500"
+      >
+        Track Request
+      </a>
+    </div>
+
+    <p className="mt-4 text-xs text-gray-500">
+      WhatsApp opens with a ready message, but the message is sent only after
+      tapping send in WhatsApp.
+    </p>
+  </div>
             )}
+            
           </form>
         </section>
       </Reveal>

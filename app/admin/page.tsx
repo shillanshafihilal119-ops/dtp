@@ -2,15 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { PDFDocument } from "pdf-lib";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminPage() {
   const [requests, setRequests] = useState<any[]>([]);
+  const [prices, setPrices] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [paymentFilter, setPaymentFilter] = useState("All");
   const [correctionFilter, setCorrectionFilter] = useState("All");
   const [loading, setLoading] = useState(false);
+  const [savingPrices, setSavingPrices] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [toast, setToast] = useState("");
@@ -19,36 +22,59 @@ export default function AdminPage() {
 
   function showToast(message: string) {
     setToast(message);
-
-    setTimeout(() => {
-      setToast("");
-    }, 3000);
+    setTimeout(() => setToast(""), 3000);
   }
 
   useEffect(() => {
-    const isAdmin = localStorage.getItem("isAdmin");
-    const loginTime = localStorage.getItem("adminLoginTime");
-
-    const expired =
-      !loginTime ||
-      Date.now() - Number(loginTime) > 24 * 60 * 60 * 1000;
-
-    if (isAdmin !== "true" || expired) {
-      localStorage.removeItem("isAdmin");
-      localStorage.removeItem("adminLoginTime");
-
-      alert(
-        expired
-          ? "Admin session expired. Please login again."
-          : "Please login first."
-      );
-
-      router.push("/admin-login");
-      return;
-    }
+    fetchRequests();
+    fetchPricing();
 
     fetchRequests();
+    fetchPricing();
   }, [router]);
+
+  async function fetchPricing() {
+    const { data, error } = await supabase
+      .from("pricing_settings")
+      .select("*")
+      .order("medium", { ascending: true });
+
+    if (error) {
+      console.log(error);
+    } else {
+      setPrices(data || []);
+    }
+  }
+
+  async function savePricing() {
+    try {
+      setSavingPrices(true);
+
+      const res = await fetch("/api/admin-pricing", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": process.env.NEXT_PUBLIC_ADMIN_PASSWORD!,
+        },
+        body: JSON.stringify({ prices }),
+      });
+
+      const result = await res.json();
+
+      if (!result.success) {
+        alert(result.error || "Failed to update pricing");
+        return;
+      }
+
+      showToast("Pricing updated successfully");
+      fetchPricing();
+    } catch (error) {
+      console.log(error);
+      alert("Failed to update pricing");
+    } finally {
+      setSavingPrices(false);
+    }
+  }
 
   async function fetchRequests() {
     const { data, error } = await supabase
@@ -134,39 +160,104 @@ export default function AdminPage() {
     }
   }
 
-  async function uploadFinalPdf(id: number, file: File) {
+  async function uploadFinalPdf(id: number, file: File, request: any) {
     setLoading(true);
 
-    const fileName = `${Date.now()}-${file.name}`;
+    try {
+      const oldPageCount = Number(request.page_count || 0);
+      const paidPageCount = Number(request.paid_page_count || 0);
+      const pagesAlreadyPaidFor =
+        paidPageCount > 0 ? paidPageCount : oldPageCount;
 
-    const { data, error } = await supabase.storage
-      .from("final-papers")
-      .upload(fileName, file);
+      const bytes = await file.arrayBuffer();
+      const pdf = await PDFDocument.load(bytes);
+      const pageCount = pdf.getPageCount();
 
-    if (error) {
-      console.log(error);
-      alert("PDF upload failed");
-      setLoading(false);
-      return;
-    }
+      const { data: priceRow, error: priceError } = await supabase
+        .from("pricing_settings")
+        .select("*")
+        .eq("medium", request.medium)
+        .single();
 
-    const { error: updateError } = await supabase
-      .from("paper_requests")
-      .update({
+      if (priceError || !priceRow) {
+        console.log(priceError);
+        alert(`Pricing not found for ${request.medium}`);
+        setLoading(false);
+        return;
+      }
+
+      const rate = Number(priceRow.rate_per_page);
+      const totalAmount = pageCount * rate;
+      const fileName = `${Date.now()}-${file.name}`;
+
+      if (request.final_pdf_url) {
+        await supabase.storage
+          .from("final-papers")
+          .remove([request.final_pdf_url]);
+      }
+
+      const { data, error } = await supabase.storage
+        .from("final-papers")
+        .upload(fileName, file, {
+          upsert: true,
+        });
+
+      if (error) {
+        console.log(error);
+        alert("PDF upload failed");
+        setLoading(false);
+        return;
+      }
+
+      let updateData: any = {
         final_pdf_url: data.path,
         status: "Ready",
         correction_notes: null,
-      })
-      .eq("id", id);
+        page_count: pageCount,
+        total_amount: totalAmount,
+      };
 
-    setLoading(false);
+      if (request.payment_status === "Paid" && pageCount > pagesAlreadyPaidFor) {
+        const extraPages = pageCount - pagesAlreadyPaidFor;
+        const extraAmount = extraPages * rate;
 
-    if (updateError) {
-      console.log(updateError);
-      alert("Failed to save PDF");
-    } else {
-      showToast("Final PDF uploaded successfully");
-      fetchRequests();
+        updateData = {
+          ...updateData,
+          payment_status: "Partially Paid",
+          extra_pages: extraPages,
+          extra_amount_due: extraAmount,
+          payment_note: `Your corrected paper now contains additional pages. Previous paid pages: ${pagesAlreadyPaidFor}. Updated final pages: ${pageCount}. Additional pages: ${extraPages}. Only the additional pages are charged. Previous payment remains valid.`,
+        };
+      }
+
+      if (request.payment_status === "Paid" && pageCount <= pagesAlreadyPaidFor) {
+        updateData = {
+          ...updateData,
+          extra_pages: 0,
+          extra_amount_due: 0,
+          payment_note: null,
+        };
+      }
+
+      const { error: updateError } = await supabase
+        .from("paper_requests")
+        .update(updateData)
+        .eq("id", id);
+
+      setLoading(false);
+
+      if (updateError) {
+        console.log(updateError);
+        alert("Failed to save PDF");
+      } else {
+        showToast(`Final PDF uploaded • ${pageCount} pages • ₹${totalAmount}`);
+        fetchRequests();
+        fetchPricing();
+      }
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      alert("PDF processing failed");
     }
   }
 
@@ -206,18 +297,12 @@ export default function AdminPage() {
       statusFilter === "All" || request.status === statusFilter;
 
     const matchesPayment =
-      paymentFilter === "All" ||
-      request.payment_status === paymentFilter;
+      paymentFilter === "All" || request.payment_status === paymentFilter;
 
     const matchesCorrection =
       correctionFilter === "All" || Boolean(request.correction_notes);
 
-    return (
-      matchesSearch &&
-      matchesStatus &&
-      matchesPayment &&
-      matchesCorrection
-    );
+    return matchesSearch && matchesStatus && matchesPayment && matchesCorrection;
   });
 
   return (
@@ -225,13 +310,8 @@ export default function AdminPage() {
       {showDeleteModal && (
         <div className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/80 p-6 pt-24">
           <div className="w-full max-w-md rounded-2xl border border-red-500/20 bg-zinc-950 p-8 shadow-2xl">
-            <p className="text-2xl font-bold text-red-400">
-              Delete Request?
-            </p>
-
-            <p className="mt-3 text-gray-400">
-              This action cannot be undone.
-            </p>
+            <p className="text-2xl font-bold text-red-400">Delete Request?</p>
+            <p className="mt-3 text-gray-400">This action cannot be undone.</p>
 
             <div className="mt-8 flex gap-4">
               <button
@@ -246,9 +326,7 @@ export default function AdminPage() {
 
               <button
                 onClick={() => {
-                  if (deleteId) {
-                    deleteRequest(deleteId);
-                  }
+                  if (deleteId) deleteRequest(deleteId);
                 }}
                 className="flex-1 rounded bg-red-600 py-3 font-bold text-white"
               >
@@ -287,7 +365,7 @@ export default function AdminPage() {
               </h1>
 
               <p className="mt-2 text-gray-400">
-                Manage active requests, uploads, payments, and corrections.
+                Manage active requests, uploads, payments, pricing, and corrections.
               </p>
             </div>
 
@@ -301,15 +379,63 @@ export default function AdminPage() {
 
               <button
                 onClick={() => {
-                  localStorage.removeItem("isAdmin");
-                  localStorage.removeItem("adminLoginTime");
-                  router.push("/admin-login");
+                  document.cookie =
+"vintage_admin=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+router.push(
+"/admin-login"
+);
                 }}
                 className="rounded bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-500"
               >
                 Logout
               </button>
             </div>
+          </div>
+
+          <div className="mb-8 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 shadow-lg">
+            <p className="text-xl font-bold text-yellow-500">Pricing Settings</p>
+            <p className="mt-2 text-sm text-gray-400">
+              Edit per-page rates. These rates are used when admin uploads the final PDF.
+            </p>
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-3">
+              {prices.map((price, index) => (
+                <div
+                  key={price.medium}
+                  className="rounded-xl border border-yellow-500/10 bg-black/40 p-4"
+                >
+                  <p className="mb-2 font-semibold text-yellow-400">
+                    {price.medium}
+                  </p>
+
+                  <input
+                    type="number"
+                    min={1}
+                    value={price.rate_per_page}
+                    onChange={(e) => {
+                      const updated = [...prices];
+                      updated[index] = {
+                        ...updated[index],
+                        rate_per_page: Number(e.target.value),
+                      };
+                      setPrices(updated);
+                    }}
+                    className="w-full rounded border border-yellow-500/20 bg-black/60 p-3 text-white outline-none focus:border-yellow-500"
+                  />
+
+                  <p className="mt-2 text-xs text-gray-500">₹ per page</p>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={savePricing}
+              disabled={savingPrices}
+              className="mt-5 rounded bg-yellow-500 px-5 py-3 font-bold text-black hover:bg-yellow-400 disabled:opacity-50"
+            >
+              {savingPrices ? "Saving..." : "Save Pricing"}
+            </button>
           </div>
 
           <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -349,7 +475,7 @@ export default function AdminPage() {
                 placeholder="Search requests"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="rounded border p-3"
+                className="rounded border border-yellow-500/20 bg-black/60 p-3 text-white placeholder:text-gray-500 outline-none focus:border-yellow-500"
               />
 
               <select
@@ -372,6 +498,7 @@ export default function AdminPage() {
                 <option value="All">All Payments</option>
                 <option value="Unpaid">Unpaid</option>
                 <option value="Paid">Paid</option>
+                <option value="Partially Paid">Partially Paid</option>
               </select>
 
               <select
@@ -424,6 +551,8 @@ export default function AdminPage() {
                         className={`rounded-full px-3 py-1 text-xs font-bold ${
                           request.payment_status === "Paid"
                             ? "bg-green-500 text-black"
+                            : request.payment_status === "Partially Paid"
+                            ? "bg-orange-500 text-black"
                             : "bg-red-500 text-white"
                         }`}
                       >
@@ -444,6 +573,18 @@ export default function AdminPage() {
                     </div>
                   )}
 
+                  {request.payment_note && (
+                    <div className="mb-6 rounded-xl border border-orange-500/20 bg-black/40 p-4">
+                      <p className="font-semibold text-orange-400">
+                        Extra Payment Note
+                      </p>
+
+                      <p className="mt-2 text-sm text-gray-300">
+                        {request.payment_note}
+                      </p>
+                    </div>
+                  )}
+
                   <div className="mb-6 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
                     <p><b>Phone:</b> {request.phone}</p>
                     <p><b>School:</b> {request.school}</p>
@@ -454,6 +595,9 @@ export default function AdminPage() {
                     <p><b>Marks:</b> {request.marks}</p>
                     <p><b>Duration:</b> {request.duration}</p>
                     <p><b>Medium:</b> {request.medium}</p>
+                    <p><b>Pages:</b> {request.page_count || 0}</p>
+                    <p><b>Total Amount:</b> ₹{request.total_amount || 0}</p>
+                    <p><b>Extra Due:</b> ₹{request.extra_amount_due || 0}</p>
                   </div>
 
                   {request.instructions && (
@@ -496,43 +640,41 @@ export default function AdminPage() {
                       >
                         <option value="Unpaid">Unpaid</option>
                         <option value="Paid">Paid</option>
+                        <option value="Partially Paid">Partially Paid</option>
                       </select>
                     </div>
                   </div>
+
+                  {request.status === "Submitted" && (
+                    <button
+                      onClick={() => updateStatus(request.id, "In Progress")}
+                      className="mb-6 w-full rounded bg-yellow-500 p-3 font-semibold text-black hover:bg-yellow-400"
+                    >
+                      Start Work
+                    </button>
+                  )}
 
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
                       <p className="mb-3 font-semibold">Final PDF</p>
 
-                      {!request.final_pdf_url ? (
-                        <input
-                          className="w-full rounded border p-3"
-                          type="file"
-                          accept=".pdf"
-                          onChange={(e) => {
-                            if (e.target.files?.[0]) {
-                              uploadFinalPdf(request.id, e.target.files[0]);
-                            }
-                          }}
-                        />
-                      ) : (
-                        <>
-                          <p className="mb-4 font-semibold text-green-400">
-                            Final PDF already uploaded
+                      {request.final_pdf_url && (
+                        <div className="mb-4">
+                          <p className="mb-3 font-semibold text-green-400">
+                            Final PDF uploaded
                           </p>
 
-                          <div className="flex flex-col gap-3">
-                            <a
-                              href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`}
-                              target="_blank"
-                              className="rounded bg-blue-600 px-4 py-3 text-center font-semibold text-white transition hover:bg-blue-500"
-                            >
-                              View Final PDF
-                            </a>
+                          <a
+                            href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`}
+                            target="_blank"
+                            className="mb-3 block rounded bg-blue-600 px-4 py-3 text-center font-semibold text-white transition hover:bg-blue-500"
+                          >
+                            View Current Final PDF
+                          </a>
 
-                            <a
-                              href={`https://wa.me/91${request.phone}?text=${encodeURIComponent(
-                                `Vintage DTP
+                          <a
+                            href={`https://wa.me/91${request.phone}?text=${encodeURIComponent(
+                              `Vintage DTP
 
 Hello ${request.teacher_name},
 
@@ -542,30 +684,45 @@ Request ID: ${request.request_id}
 
 Subject: ${request.subject}
 Class: ${request.class}
+Pages: ${request.page_count || 0}
+Amount: ₹${request.total_amount || 0}
+Payment Status: ${request.payment_status || "Unpaid"}
 
 Track your paper here:
 https://dtp-gules.vercel.app/track
 
-Payment Status:
-${request.payment_status || "Unpaid"}
-
 Thank you for choosing Vintage DTP.`
-                              )}`}
-                              target="_blank"
-                              className="rounded bg-green-600 px-4 py-3 text-center font-semibold text-white transition hover:bg-green-500"
-                            >
-                              Notify Customer on WhatsApp
-                            </a>
-                          </div>
-                        </>
+                            )}`}
+                            target="_blank"
+                            className="mb-3 block rounded bg-green-600 px-4 py-3 text-center font-semibold text-white transition hover:bg-green-500"
+                          >
+                            Notify Customer on WhatsApp
+                          </a>
+                        </div>
                       )}
+
+                      <input
+                        className="w-full rounded border border-yellow-500/20 bg-black/60 p-3 text-white"
+                        type="file"
+                        accept=".pdf"
+                        onChange={(e) => {
+                          if (e.target.files?.[0]) {
+                            uploadFinalPdf(request.id, e.target.files[0], request);
+                            e.currentTarget.value = "";
+                          }
+                        }}
+                      />
+
+                      <p className="mt-2 text-xs text-gray-500">
+                        Upload again anytime to replace the current final PDF and recalculate pages and amount.
+                      </p>
                     </div>
 
                     <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
                       <p className="mb-3 font-semibold">Preview Image</p>
 
                       <input
-                        className="w-full rounded border p-3"
+                        className="w-full rounded border border-yellow-500/20 bg-black/60 p-3 text-white"
                         type="file"
                         accept="image/*"
                         onChange={(e) => {
@@ -624,11 +781,7 @@ Thank you for choosing Vintage DTP.`
 
                   <button
                     onClick={() => {
-                      window.scrollTo({
-                        top: 0,
-                        behavior: "smooth",
-                      });
-
+                      window.scrollTo({ top: 0, behavior: "smooth" });
                       setDeleteId(request.id);
                       setShowDeleteModal(true);
                     }}
