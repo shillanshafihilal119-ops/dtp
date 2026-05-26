@@ -37,6 +37,17 @@ export default function TrackPage() {
     return Number(request.total_amount || 0);
   }
 
+  function formatStepTime(value: string | null | undefined) {
+    if (!value) return "Pending";
+
+    return new Date(value).toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
   async function searchRequests(e: React.FormEvent) {
     e.preventDefault();
 
@@ -195,11 +206,15 @@ export default function TrackPage() {
       }, 1000);
 
       if (request.status !== "Delivered") {
+        const deliveredAt = new Date().toISOString();
+
         await supabase
           .from("paper_requests")
           .update({
-            status: "Delivered",
-          })
+  status: "Delivered",
+  delivered_at: deliveredAt,
+  correction_notes: null,
+})
           .eq("id", request.id);
 
         setRequests((prev) =>
@@ -208,6 +223,8 @@ export default function TrackPage() {
               ? {
                   ...item,
                   status: "Delivered",
+                  delivered_at: deliveredAt,
+                  correction_notes: null,
                 }
               : item
           )
@@ -339,83 +356,48 @@ export default function TrackPage() {
                 </p>
               </div>
 
-              <div className="
-mb-6
-rounded-xl
-border
-border-yellow-500/10
-bg-black/40
-p-4">
+              <div className="mb-6 rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+                <p className="text-xs uppercase tracking-wide text-gray-500">
+                  Submitted On
+                </p>
 
-<p className="
-text-xs
-uppercase
-tracking-wide
-text-gray-500">
+                <p className="mt-1 font-semibold text-white">
+                  {new Date(request.created_at).toLocaleString("en-IN", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
 
-Submitted On
-
-</p>
-
-<p className="
-mt-1
-font-semibold
-text-white">
-
-{
-new Date(
-request.created_at
-)
-
-.toLocaleString(
-"en-IN",
-
-{
-day: "2-digit",
-month: "short",
-year: "numeric",
-hour: "2-digit",
-minute: "2-digit",
-}
-
-)
-
-}
-
-</p>
-
-</div>
-
-              <div className="
-grid
-gap-4
-sm:grid-cols-2
-lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[
-  ["Teacher", request.teacher_name],
-  ["School", request.school],
-  ["Class", request.class],
-  ["Subject", request.subject],
-  ["Session", request.session],
-  ["Examination", request.examination],
-  ["Marks", request.marks],
-  ["Duration", request.duration],
-  ["Medium", request.medium],
-  ["Final Pages", request.page_count || 0],
-  [
-    "Rate / Page",
-    `₹${
-      request.page_count
-        ? Math.round(
-            Number(request.total_amount || 0) /
-              Number(request.page_count)
-          )
-        : 0
-    }`,
-  ],
-  ["Total Amount", `₹${request.total_amount || 0}`],
-  ["Paid Amount", `₹${request.paid_amount || 0}`],
-].map(([label, value]) => (
+                  ["Teacher", request.teacher_name],
+                  ["School", request.school],
+                  ["Class", request.class],
+                  ["Subject", request.subject],
+                  ["Session", request.session],
+                  ["Examination", request.examination],
+                  ["Marks", request.marks],
+                  ["Duration", request.duration],
+                  ["Medium", request.medium],
+                  ["Final Pages", request.page_count || 0],
+                  [
+                    "Rate / Page",
+                    `₹${
+                      request.page_count
+                        ? Math.round(
+                            Number(request.total_amount || 0) /
+                              Number(request.page_count)
+                          )
+                        : 0
+                    }`,
+                  ],
+                  ["Total Amount", `₹${request.total_amount || 0}`],
+                  ["Paid Amount", `₹${request.paid_amount || 0}`],
+                ].map(([label, value]) => (
                   <div
                     key={label}
                     className="rounded-xl border border-yellow-500/10 bg-black/40 p-4"
@@ -428,10 +410,13 @@ lg:grid-cols-3">
                   </div>
                 ))}
 
-                <p>
-                  <b>Status:</b>{" "}
+                <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">
+                    Status
+                  </p>
+
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-bold ${
+                    className={`mt-2 inline-block rounded-full px-3 py-1 text-xs font-bold ${
                       request.status === "Submitted"
                         ? "bg-blue-500 text-white"
                         : request.status === "In Progress"
@@ -443,12 +428,15 @@ lg:grid-cols-3">
                   >
                     {request.status}
                   </span>
-                </p>
+                </div>
 
-                <p>
-                  <b>Payment:</b>{" "}
+                <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">
+                    Payment
+                  </p>
+
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-bold ${
+                    className={`mt-2 inline-block rounded-full px-3 py-1 text-xs font-bold ${
                       request.payment_status === "Paid"
                         ? "bg-green-500 text-black"
                         : request.payment_status === "Partially Paid"
@@ -458,7 +446,7 @@ lg:grid-cols-3">
                   >
                     {request.payment_status || "Unpaid"}
                   </span>
-                </p>
+                </div>
               </div>
 
               <div className="mt-8">
@@ -466,18 +454,18 @@ lg:grid-cols-3">
                   Delivery Progress
                 </h3>
 
-                <div className="relative flex items-center justify-between">
-                  <div className="absolute left-0 top-5 h-1 w-full rounded-full bg-zinc-800" />
+                <div className="relative flex items-start justify-between gap-2 overflow-x-auto pb-2">
+                  <div className="absolute left-0 top-5 h-1 w-full min-w-140 rounded-full bg-zinc-800" />
 
                   <div
-                    className={`absolute left-0 top-5 h-1 rounded-full bg-linear-to-r from-yellow-600 to-yellow-400 transition-all duration-1800 ease-out ${
+                    className={`absolute left-0 top-5 h-1 rounded-full bg-linear-to-r from-yellow-700 via-yellow-500 to-yellow-300 shadow-[0_0_18px_rgba(234,179,8,0.35)] transition-all duration-1800 ease-out ${
                       request.status === "Submitted"
-                        ? "w-[0%]"
-                        : request.status === "In Progress"
-                        ? "w-[33%]"
-                        : request.status === "Ready"
-                        ? "w-[66%]"
-                        : "w-full"
+  ? "w-[8%]"
+  : request.status === "In Progress"
+  ? "w-[36%]"
+  : request.status === "Ready"
+  ? "w-[66%]"
+  : "w-full"
                     }`}
                   />
 
@@ -490,10 +478,23 @@ lg:grid-cols-3">
                         (request.status === "In Progress" &&
                           (step === "Submitted" || step === "In Progress"));
 
+                      const isCorrection = Boolean(request.correction_notes);
+
+const stepTime =
+  step === "Submitted"
+    ? isCorrection
+      ? request.corrected_at
+      : request.created_at
+    : step === "In Progress"
+    ? request.started_at
+    : step === "Ready"
+    ? request.ready_at
+    : request.delivered_at;
+
                       return (
                         <div
                           key={step}
-                          className="relative z-10 flex flex-col items-center"
+                          className="relative z-10 flex min-w-28 flex-col items-center"
                         >
                           <div
                             className={`flex h-10 w-10 items-center justify-center rounded-full border-4 font-bold transition-all duration-700 ${
@@ -505,7 +506,21 @@ lg:grid-cols-3">
                             {active ? "✓" : "•"}
                           </div>
 
-                          <p className="mt-3 text-center text-xs">{step}</p>
+                          <div className="mt-3 text-center">
+                            <p
+                              className={`text-sm font-semibold ${
+                                active ? "text-yellow-400" : "text-gray-500"
+                              }`}
+                            >
+                              {step === "Submitted" && request.correction_notes
+  ? "Correction Submitted"
+  : step}
+                            </p>
+
+                            <p className="mt-1 text-xs leading-relaxed text-gray-500">
+                              {formatStepTime(stepTime)}
+                            </p>
+                          </div>
                         </div>
                       );
                     }
@@ -514,47 +529,24 @@ lg:grid-cols-3">
               </div>
 
               {request.status !== "Delivered" && (
-  <div className="
-mt-6
-rounded-2xl
-border
-border-yellow-500/20
-bg-zinc-950
-p-5">
+                <div className="mt-6 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
+                  <p className="font-bold text-yellow-500">
+                    Estimated Delivery
+                  </p>
 
-<p className="
-font-bold
-text-yellow-500">
-
-Estimated Delivery
-
-</p>
-
-<p className="
-mt-2
-text-gray-300">
-
-{request.status ===
-"Submitted"
-
-? "Your request is waiting for work assignment. Estimated completion: within 1 day."
-
-: request.status ===
-"In Progress"
-
-? "Your paper formatting is in progress. Estimated completion: today."
-
-: request.status ===
-"Ready"
-
-? "Your paper is completed and waiting for payment / download."
-
-: ""}
-
-</p>
-
-</div>
-)}
+                  <p className="mt-2 text-gray-300">
+                    {request.status === "Submitted"
+  ? request.correction_notes
+    ? "Your correction request is waiting for review. Estimated completion: within 1 day."
+    : "Your request is waiting for work assignment. Estimated completion: within 1 day."
+                      : request.status === "In Progress"
+                      ? "Your paper formatting is in progress. Estimated completion: today."
+                      : request.status === "Ready"
+                      ? "Your paper is completed and waiting for payment / download."
+                      : ""}
+                  </p>
+                </div>
+              )}
 
               {request.preview_url && request.status !== "In Progress" && (
                 <div className="mt-8 flex flex-col items-center">
@@ -687,7 +679,10 @@ text-gray-300">
                 </div>
               )}
 
-              {delivered && !request.correction_notes && (
+              {delivered &&
+  !request.correction_notes &&
+  request.payment_status === "Paid" &&
+  Number(request.extra_amount_due || 0) === 0 && (
                 <div className="mt-6 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6">
                   <p className="text-xl font-bold text-yellow-500">
                     Need Correction?
@@ -712,11 +707,15 @@ text-gray-300">
                       await supabase
                         .from("paper_requests")
                         .update({
-                          status: "Submitted",
-                          final_pdf_url: null,
-                          preview_url: null,
-                          correction_notes: correctionNotes,
-                        })
+  status: "Submitted",
+  final_pdf_url: null,
+  preview_url: null,
+  correction_notes: correctionNotes,
+  corrected_at: new Date().toISOString(),
+  started_at: null,
+  ready_at: null,
+  delivered_at: null,
+})
                         .eq("request_id", request.request_id);
 
                       setCorrectionLoading(false);
@@ -730,6 +729,10 @@ text-gray-300">
                                 final_pdf_url: null,
                                 preview_url: null,
                                 correction_notes: correctionNotes,
+                                corrected_at: new Date().toISOString(),
+                                started_at: null,
+ready_at: null,
+delivered_at: null,
                               }
                             : item
                         )
@@ -756,7 +759,9 @@ text-gray-300">
                   </p>
 
                   <p className="mt-2 text-gray-400">
-                    Your latest correction note has been received. We will review the details and update you once the corrected paper is ready. Thank you for your patience.  
+                    Your latest correction note has been received. We will
+                    review the details and update you once the corrected paper is
+                    ready. Thank you for your patience.
                   </p>
                 </div>
               )}

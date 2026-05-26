@@ -25,10 +25,19 @@ export default function AdminPage() {
     setTimeout(() => setToast(""), 3000);
   }
 
-  useEffect(() => {
-    fetchRequests();
-    fetchPricing();
+  function formatAdminDate(value: string | null | undefined) {
+    if (!value) return "Pending";
 
+    return new Date(value).toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  useEffect(() => {
     fetchRequests();
     fetchPricing();
   }, [router]);
@@ -90,13 +99,38 @@ export default function AdminPage() {
     }
   }
 
-  async function updateStatus(id: number, status: string) {
+  async function updateStatus(request: any, status: string) {
+    
+    if (status === "Delivered" && request.payment_status !== "Paid") {
+  alert("Cannot mark as delivered until payment is paid.");
+  return;
+}
+
+if (status === "Ready" && !request.final_pdf_url) {
+  alert("Upload the final PDF before marking this request as ready.");
+  return;
+}
+
     setLoading(true);
+
+    const updateData: any = { status };
+
+    if (status === "In Progress") {
+      updateData.started_at = new Date().toISOString();
+    }
+
+    if (status === "Ready") {
+      updateData.ready_at = new Date().toISOString();
+    }
+
+    if (status === "Delivered") {
+      updateData.delivered_at = new Date().toISOString();
+    }
 
     const { error } = await supabase
       .from("paper_requests")
-      .update({ status })
-      .eq("id", id);
+      .update(updateData)
+      .eq("id", request.id);
 
     setLoading(false);
 
@@ -109,13 +143,31 @@ export default function AdminPage() {
     }
   }
 
-  async function updatePaymentStatus(id: number, payment_status: string) {
+  async function updatePaymentStatus(request: any, payment_status: string) {
     setLoading(true);
+
+    const updateData: any = { payment_status };
+
+    if (payment_status === "Paid") {
+      updateData.paid_page_count = request.page_count || 0;
+      updateData.paid_amount = request.total_amount || 0;
+      updateData.extra_pages = 0;
+      updateData.extra_amount_due = 0;
+      updateData.payment_note = null;
+    }
+
+    if (payment_status === "Unpaid") {
+      updateData.paid_page_count = 0;
+      updateData.paid_amount = 0;
+      updateData.extra_pages = 0;
+      updateData.extra_amount_due = 0;
+      updateData.payment_note = null;
+    }
 
     const { error } = await supabase
       .from("paper_requests")
-      .update({ payment_status })
-      .eq("id", id);
+      .update(updateData)
+      .eq("id", request.id);
 
     setLoading(false);
 
@@ -198,9 +250,7 @@ export default function AdminPage() {
 
       const { data, error } = await supabase.storage
         .from("final-papers")
-        .upload(fileName, file, {
-          upsert: true,
-        });
+        .upload(fileName, file, { upsert: true });
 
       if (error) {
         console.log(error);
@@ -210,12 +260,12 @@ export default function AdminPage() {
       }
 
       let updateData: any = {
-        final_pdf_url: data.path,
-        status: "Ready",
-        correction_notes: null,
-        page_count: pageCount,
-        total_amount: totalAmount,
-      };
+  final_pdf_url: data.path,
+  status: "Ready",
+  ready_at: new Date().toISOString(),
+  page_count: pageCount,
+  total_amount: totalAmount,
+};
 
       if (request.payment_status === "Paid" && pageCount > pagesAlreadyPaidFor) {
         const extraPages = pageCount - pagesAlreadyPaidFor;
@@ -300,7 +350,8 @@ export default function AdminPage() {
       paymentFilter === "All" || request.payment_status === paymentFilter;
 
     const matchesCorrection =
-      correctionFilter === "All" || Boolean(request.correction_notes);
+  correctionFilter === "All" ||
+  (correctionFilter === "Corrections" && Boolean(request.correction_notes));
 
     return matchesSearch && matchesStatus && matchesPayment && matchesCorrection;
   });
@@ -308,7 +359,7 @@ export default function AdminPage() {
   return (
     <>
       {showDeleteModal && (
-        <div className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/80 p-6 pt-24">
+        <div className="fixed inset-0 z-9999 flex items-start justify-center bg-black/80 p-6 pt-24">
           <div className="w-full max-w-md rounded-2xl border border-red-500/20 bg-zinc-950 p-8 shadow-2xl">
             <p className="text-2xl font-bold text-red-400">Delete Request?</p>
             <p className="mt-3 text-gray-400">This action cannot be undone.</p>
@@ -339,7 +390,7 @@ export default function AdminPage() {
 
       <main className="min-h-screen px-6 py-12 sm:px-10 animate-fade-in">
         {toast && (
-          <div className="fixed right-6 top-6 z-[9999] rounded-2xl border border-green-500/20 bg-zinc-950 p-5 shadow-xl">
+          <div className="fixed right-6 top-6 z-9999 rounded-2xl border border-green-500/20 bg-zinc-950 p-5 shadow-xl">
             <p className="font-bold text-green-400">✓ Success</p>
             <p className="mt-1 text-sm text-gray-300">{toast}</p>
           </div>
@@ -380,11 +431,8 @@ export default function AdminPage() {
               <button
                 onClick={() => {
                   document.cookie =
-"vintage_admin=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
-router.push(
-"/admin-login"
-);
+                    "vintage_admin=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                  router.push("/admin-login");
                 }}
                 className="rounded bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-500"
               >
@@ -439,33 +487,33 @@ router.push(
           </div>
 
           <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
-              <p className="text-sm text-gray-400">Submitted</p>
-              <p className="mt-2 text-3xl font-bold text-blue-400">
-                {requests.filter((r) => r.status === "Submitted").length}
-              </p>
-            </div>
+            {[
+              [
+                "Submitted",
+                requests.filter((r) => r.status === "Submitted").length,
+                "text-blue-400",
+              ],
+              [
+                "In Progress",
+                requests.filter((r) => r.status === "In Progress").length,
+                "text-yellow-400",
+              ],
+              [
+                "Ready",
+                requests.filter((r) => r.status === "Ready").length,
+                "text-orange-400",
+              ],
+              ["Corrections", requests.filter((r) => r.correction_notes).length, "text-orange-400"],
 
-            <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
-              <p className="text-sm text-gray-400">In Progress</p>
-              <p className="mt-2 text-3xl font-bold text-yellow-400">
-                {requests.filter((r) => r.status === "In Progress").length}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
-              <p className="text-sm text-gray-400">Ready</p>
-              <p className="mt-2 text-3xl font-bold text-orange-400">
-                {requests.filter((r) => r.status === "Ready").length}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
-              <p className="text-sm text-gray-400">Corrections</p>
-              <p className="mt-2 text-3xl font-bold text-green-400">
-                {requests.filter((r) => r.correction_notes).length}
-              </p>
-            </div>
+            ].map(([label, value, color]) => (
+              <div
+                key={label}
+                className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5"
+              >
+                <p className="text-sm text-gray-400">{label}</p>
+                <p className={`mt-2 text-3xl font-bold ${color}`}>{value}</p>
+              </div>
+            ))}
           </div>
 
           <div className="mb-8 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6">
@@ -516,6 +564,58 @@ router.push(
             {filteredRequests.map((request: any) => {
               const uploadedPaperUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/paper-uploads/${request.file_url}`;
 
+              const timeline = request.correction_notes
+                ? [
+                    [
+                      "Correction",
+                      request.corrected_at,
+                      Boolean(request.corrected_at),
+                    ],
+                    [
+                      "Restarted",
+                      request.started_at,
+                      request.status === "In Progress" ||
+                        request.status === "Ready" ||
+                        request.status === "Delivered",
+                    ],
+                    [
+                      "Ready Again",
+                      request.ready_at,
+                      request.status === "Ready" ||
+                        request.status === "Delivered",
+                    ],
+                    [
+                      "Delivered",
+                      request.delivered_at,
+                      request.status === "Delivered",
+                    ],
+                  ]
+                : [
+                    [
+                      "Submitted",
+                      request.created_at,
+                      Boolean(request.created_at),
+                    ],
+                    [
+                      "Started",
+                      request.started_at,
+                      request.status === "In Progress" ||
+                        request.status === "Ready" ||
+                        request.status === "Delivered",
+                    ],
+                    [
+                      "Ready",
+                      request.ready_at,
+                      request.status === "Ready" ||
+                        request.status === "Delivered",
+                    ],
+                    [
+                      "Delivered",
+                      request.delivered_at,
+                      request.status === "Delivered",
+                    ],
+                  ];
+
               return (
                 <div
                   key={request.id}
@@ -523,9 +623,17 @@ router.push(
                 >
                   <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <h2 className="text-2xl font-bold">
-                        {request.teacher_name}
-                      </h2>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+  <h2 className="text-2xl font-bold">
+    {request.teacher_name}
+  </h2>
+
+  {request.correction_notes && (
+    <span className="w-fit rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-400">
+      Correction
+    </span>
+  )}
+</div>
 
                       <p className="mt-2 text-sm text-gray-400">
                         Request ID: {request.request_id}
@@ -562,12 +670,24 @@ router.push(
                   </div>
 
                   {request.correction_notes && (
-                    <div className="mb-6 rounded-xl border border-yellow-500/20 bg-black/40 p-4">
-                      <p className="font-semibold text-yellow-400">
-                        Latest Correction Note
-                      </p>
+                    <div className="mb-6 rounded-xl border border-orange-500/30 bg-orange-500/5 p-5">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <p className="text-lg font-bold text-orange-400">
+                            Correction Requested
+                          </p>
 
-                      <p className="mt-2 text-sm text-gray-300">
+                          <p className="mt-1 text-sm text-gray-500">
+                            Submitted: {formatAdminDate(request.corrected_at)}
+                          </p>
+                        </div>
+
+                        <span className="w-fit rounded-full bg-orange-500 px-3 py-1 text-xs font-bold text-black">
+                          Needs Review
+                        </span>
+                      </div>
+
+                      <p className="mt-4 rounded-lg border border-orange-500/10 bg-black/40 p-4 text-sm leading-relaxed text-gray-300">
                         {request.correction_notes}
                       </p>
                     </div>
@@ -585,19 +705,110 @@ router.push(
                     </div>
                   )}
 
+                  {request.status === "Ready" && request.payment_status === "Unpaid" && (
+  <div className="mb-6 rounded-xl border border-red-500/25 bg-red-500/5 p-4">
+    <p className="font-semibold text-red-400">
+      Payment Pending
+    </p>
+
+    <p className="mt-2 text-sm text-gray-300">
+      Final PDF is ready, but the customer has not completed payment yet.
+    </p>
+  </div>
+)}
+
                   <div className="mb-6 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
-                    <p><b>Phone:</b> {request.phone}</p>
-                    <p><b>School:</b> {request.school}</p>
-                    <p><b>Class:</b> {request.class}</p>
-                    <p><b>Subject:</b> {request.subject}</p>
-                    <p><b>Session:</b> {request.session}</p>
-                    <p><b>Exam:</b> {request.examination}</p>
-                    <p><b>Marks:</b> {request.marks}</p>
-                    <p><b>Duration:</b> {request.duration}</p>
-                    <p><b>Medium:</b> {request.medium}</p>
-                    <p><b>Pages:</b> {request.page_count || 0}</p>
-                    <p><b>Total Amount:</b> ₹{request.total_amount || 0}</p>
-                    <p><b>Extra Due:</b> ₹{request.extra_amount_due || 0}</p>
+                    <p>
+                      <b>Phone:</b> {request.phone}
+                    </p>
+                    <p>
+                      <b>School:</b> {request.school}
+                    </p>
+                    <p>
+                      <b>Class:</b> {request.class}
+                    </p>
+                    <p>
+                      <b>Subject:</b> {request.subject}
+                    </p>
+                    <p>
+                      <b>Session:</b> {request.session}
+                    </p>
+                    <p>
+                      <b>Exam:</b> {request.examination}
+                    </p>
+                    <p>
+                      <b>Marks:</b> {request.marks}
+                    </p>
+                    <p>
+                      <b>Duration:</b> {request.duration}
+                    </p>
+                    <p>
+                      <b>Medium:</b> {request.medium}
+                    </p>
+                    <p>
+                      <b>Pages:</b> {request.page_count || 0}
+                    </p>
+                    <p>
+                      <b>Total Amount:</b> ₹{request.total_amount || 0}
+                    </p>
+                    <p>
+                      <b>Extra Due:</b> ₹{request.extra_amount_due || 0}
+                    </p>
+                  </div>
+
+                  <div className="mb-6 rounded-xl border border-yellow-500/10 bg-black/40 p-5">
+                    <div className="mb-4 flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-lg font-bold text-yellow-500">
+                          Request Timeline
+                        </p>
+
+                        <p className="mt-1 text-sm text-gray-500">
+                          {request.correction_notes
+                            ? "Correction progress for this request."
+                            : "Admin status timestamps shown in customer order flow."}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      {timeline.map(([label, value, active]: any) => (
+                        <div
+                          key={label}
+                          className={`rounded-xl border p-4 ${
+                            active
+                              ? "border-yellow-500/30 bg-yellow-500/5"
+                              : "border-zinc-800 bg-black/30"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span
+                              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
+                                active
+                                  ? "bg-yellow-500 text-black"
+                                  : "bg-zinc-800 text-gray-500"
+                              }`}
+                            >
+                              {active ? "✓" : "•"}
+                            </span>
+
+                            <div>
+                              <p
+                                className={`text-sm font-bold ${
+                                  active ? "text-yellow-400" : "text-gray-500"
+                                }`}
+                              >
+                                {label}
+                              </p>
+
+                              <p className="mt-1 text-xs leading-relaxed text-gray-400">
+                                {formatAdminDate(value)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {request.instructions && (
@@ -615,15 +826,32 @@ router.push(
                       <select
                         value={request.status}
                         onChange={(e) =>
-                          updateStatus(request.id, e.target.value)
+                          updateStatus(request, e.target.value)
                         }
                         className="w-full rounded border bg-grey p-3 text-white focus:bg-yellow-500 focus:text-black"
                       >
                         <option>Submitted</option>
                         <option>In Progress</option>
-                        <option>Ready</option>
-                        <option>Delivered</option>
+                        <option disabled={!request.final_pdf_url}>
+  Ready
+</option>
+                        <option disabled={request.payment_status !== "Paid"}>
+  Delivered
+</option>
                       </select>
+
+                      {request.payment_status !== "Paid" && (
+  <p className="mt-2 text-xs text-gray-500">
+    Delivery is locked until payment is marked Paid.
+  </p>
+)}
+
+{!request.final_pdf_url && (
+  <p className="mt-2 text-xs text-gray-500">
+    Ready status unlocks only after final PDF upload.
+  </p>
+)}
+
                     </div>
 
                     <div>
@@ -634,7 +862,7 @@ router.push(
                       <select
                         value={request.payment_status || "Unpaid"}
                         onChange={(e) =>
-                          updatePaymentStatus(request.id, e.target.value)
+                          updatePaymentStatus(request, e.target.value)
                         }
                         className="w-full rounded border bg-grey p-3 text-white focus:bg-yellow-500 focus:text-black"
                       >
@@ -646,13 +874,13 @@ router.push(
                   </div>
 
                   {request.status === "Submitted" && (
-                    <button
-                      onClick={() => updateStatus(request.id, "In Progress")}
-                      className="mb-6 w-full rounded bg-yellow-500 p-3 font-semibold text-black hover:bg-yellow-400"
-                    >
-                      Start Work
-                    </button>
-                  )}
+  <button
+    onClick={() => updateStatus(request, "In Progress")}
+    className="mb-6 w-full rounded bg-yellow-500 p-3 font-semibold text-black hover:bg-yellow-400"
+  >
+    {request.correction_notes ? "Start Correction Work" : "Start Work"}
+  </button>
+)}
 
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
@@ -688,6 +916,8 @@ Pages: ${request.page_count || 0}
 Amount: ₹${request.total_amount || 0}
 Payment Status: ${request.payment_status || "Unpaid"}
 
+Please open the tracking page to preview the paper, complete payment if pending, and download the final PDF.
+
 Track your paper here:
 https://dtp-gules.vercel.app/track
 
@@ -707,14 +937,19 @@ Thank you for choosing Vintage DTP.`
                         accept=".pdf"
                         onChange={(e) => {
                           if (e.target.files?.[0]) {
-                            uploadFinalPdf(request.id, e.target.files[0], request);
+                            uploadFinalPdf(
+                              request.id,
+                              e.target.files[0],
+                              request
+                            );
                             e.currentTarget.value = "";
                           }
                         }}
                       />
 
                       <p className="mt-2 text-xs text-gray-500">
-                        Upload again anytime to replace the current final PDF and recalculate pages and amount.
+                        Upload again anytime to replace the current final PDF
+                        and recalculate pages and amount.
                       </p>
                     </div>
 
@@ -745,7 +980,7 @@ Thank you for choosing Vintage DTP.`
                               className="w-full transition-all duration-700 group-hover:scale-105"
                             />
 
-                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 transition group-hover:opacity-100" />
+                            <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/40 to-transparent opacity-0 transition group-hover:opacity-100" />
                           </div>
                         </div>
                       )}
@@ -765,7 +1000,7 @@ Thank you for choosing Vintage DTP.`
                           className="w-full rounded-xl transition-all duration-700 group-hover:scale-105"
                         />
 
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
+                        <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/50 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
                       </div>
 
                       <a
