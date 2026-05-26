@@ -146,7 +146,7 @@ export default function ArchivePage() {
           <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
             <p className="text-sm text-gray-400">Corrections</p>
             <p className="mt-2 text-3xl font-bold text-orange-400">
-              {requests.filter((r) => r.correction_notes).length}
+              {requests.filter((r) => r.corrected_at).length}
             </p>
           </div>
 
@@ -173,37 +173,30 @@ export default function ArchivePage() {
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-  data={monthlyRevenue}
-  margin={{ top: 20, right: 20, left: 10, bottom: 10 }}
->
-  <XAxis
-    dataKey="month"
-    stroke="#a1a1aa"
-    tick={{ fill: "#a1a1aa" }}
-  />
+                data={monthlyRevenue}
+                margin={{ top: 20, right: 20, left: 10, bottom: 10 }}
+              >
+                <XAxis
+                  dataKey="month"
+                  stroke="#a1a1aa"
+                  tick={{ fill: "#a1a1aa" }}
+                />
 
-  <YAxis
-    stroke="#a1a1aa"
-    tick={{ fill: "#a1a1aa" }}
-  />
+                <YAxis stroke="#a1a1aa" tick={{ fill: "#a1a1aa" }} />
 
-  <Tooltip
-    contentStyle={{
-      backgroundColor: "#09090b",
-      border: "1px solid rgba(234,179,8,0.3)",
-      color: "#ffffff",
-    }}
-    labelStyle={{
-      color: "#eab308",
-    }}
-  />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#09090b",
+                    border: "1px solid rgba(234,179,8,0.3)",
+                    color: "#ffffff",
+                  }}
+                  labelStyle={{
+                    color: "#eab308",
+                  }}
+                />
 
-  <Bar
-    dataKey="revenue"
-    fill="#eab308"
-    radius={[8, 8, 0, 0]}
-  />
-</BarChart>
+                <Bar dataKey="revenue" fill="#eab308" radius={[8, 8, 0, 0]} />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
@@ -261,83 +254,150 @@ export default function ArchivePage() {
         </div>
 
         <div className="space-y-6">
-          {filteredRequests.map((request: any) => (
-            <div
-              key={request.id}
-              className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 shadow-lg"
-            >
-              <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold">
-                    {request.teacher_name}
-                  </h2>
+          {filteredRequests.map((request: any) => {
+            const totalAmount = Number(request.total_amount || 0);
+            const paidAmount = getPaidAmount(request);
+            const previousAmount = Math.max(paidAmount - totalAmount, 0);
+            const correctionAmount = totalAmount;
+            const hasCorrectionBreakdown =
+              Boolean(request.corrected_at) && previousAmount > 0;
 
-                  <p className="mt-2 text-sm text-gray-400">
-                    Request ID: {request.request_id}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <span className="rounded-full bg-green-500 px-3 py-1 text-xs font-bold text-black">
-                    Delivered
-                  </span>
-
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-bold ${
-                      request.payment_status === "Paid"
-                        ? "bg-green-500 text-black"
-                        : request.payment_status === "Partially Paid"
-                        ? "bg-orange-500 text-black"
-                        : "bg-red-500 text-white"
-                    }`}
-                  >
-                    {request.payment_status || "Unpaid"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mb-6 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
-                <p><b>School:</b> {request.school}</p>
-                <p><b>Phone:</b> {request.phone}</p>
-                <p><b>Class:</b> {request.class}</p>
-                <p><b>Subject:</b> {request.subject}</p>
-                <p><b>Session:</b> {request.session}</p>
-                <p><b>Exam:</b> {request.examination}</p>
-                <p><b>Pages:</b> {request.page_count || 0}</p>
-                <p><b>Total Amount:</b> ₹{request.total_amount || 0}</p>
-                <p><b>Paid Amount:</b> ₹{getPaidAmount(request)}</p>
-              </div>
-
-              {request.final_pdf_url && (
-                <a
-                  href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`}
-                  target="_blank"
-                  className="inline-block rounded bg-green-500 px-4 py-2 font-semibold text-black hover:bg-green-400"
-                >
-                  View Final PDF
-                </a>
-              )}
-
-              <button
-                onClick={async () => {
-                  await supabase
-                    .from("paper_requests")
-                    .update({
-                      status: "Submitted",
-                      final_pdf_url: null,
-                      preview_url: null,
-                      correction_notes: "Teacher requested revision",
-                    })
-                    .eq("id", request.id);
-
-                  fetchDelivered();
-                }}
-                className="mt-4 block rounded bg-yellow-500 px-4 py-2 font-semibold text-black hover:bg-yellow-400"
+            return (
+              <div
+                key={request.id}
+                className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 shadow-lg"
               >
-                Move Back For Correction
-              </button>
-            </div>
-          ))}
+                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                      <h2 className="text-2xl font-bold">
+                        {request.teacher_name}
+                      </h2>
+
+                      {request.corrected_at && (
+                        <span className="w-fit rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-400">
+                          Corrected
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="mt-2 text-sm text-gray-400">
+                      Request ID: {request.request_id}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-full bg-green-500 px-3 py-1 text-xs font-bold text-black">
+                      Delivered
+                    </span>
+
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-bold ${
+                        request.payment_status === "Paid"
+                          ? "bg-green-500 text-black"
+                          : request.payment_status === "Partially Paid"
+                          ? "bg-orange-500 text-black"
+                          : "bg-red-500 text-white"
+                      }`}
+                    >
+                      {request.payment_status || "Unpaid"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mb-6 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                  <p>
+                    <b>School:</b> {request.school}
+                  </p>
+                  <p>
+                    <b>Phone:</b> {request.phone}
+                  </p>
+                  <p>
+                    <b>Class:</b> {request.class}
+                  </p>
+                  <p>
+                    <b>Subject:</b> {request.subject}
+                  </p>
+                  <p>
+                    <b>Session:</b> {request.session}
+                  </p>
+                  <p>
+                    <b>Exam:</b> {request.examination}
+                  </p>
+                  <p>
+                    <b>Pages:</b> {request.page_count || 0}
+                  </p>
+
+                  {hasCorrectionBreakdown ? (
+                    <>
+                      <p>
+                        <b>Total Paid:</b> ₹{paidAmount}
+                      </p>
+
+                      <p>
+                        <b>Previous Version:</b> ₹{previousAmount}
+                      </p>
+
+                      <p>
+                        <b>Correction Version:</b> ₹{correctionAmount}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p>
+                        <b>Total Amount:</b> ₹{totalAmount}
+                      </p>
+
+                      <p>
+                        <b>Paid Amount:</b> ₹{paidAmount}
+                      </p>
+                    </>
+                  )}
+                </div>
+
+                {hasCorrectionBreakdown && (
+                  <div className="mb-6 rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4">
+                    <p className="text-sm font-semibold text-yellow-400">
+                      Payment includes previous version and corrected final version.
+                    </p>
+                  </div>
+                )}
+
+                {request.final_pdf_url && (
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/final-papers/${request.final_pdf_url}`}
+                    target="_blank"
+                    className="inline-block rounded bg-green-500 px-4 py-2 font-semibold text-black hover:bg-green-400"
+                  >
+                    View Final PDF
+                  </a>
+                )}
+
+                <button
+                  onClick={async () => {
+                    await supabase
+                      .from("paper_requests")
+                      .update({
+                        status: "Submitted",
+                        final_pdf_url: null,
+                        preview_url: null,
+                        correction_notes: "Teacher requested revision",
+                        corrected_at: new Date().toISOString(),
+                        started_at: null,
+                        ready_at: null,
+                        delivered_at: null,
+                      })
+                      .eq("id", request.id);
+
+                    fetchDelivered();
+                  }}
+                  className="mt-4 block rounded bg-yellow-500 px-4 py-2 font-semibold text-black hover:bg-yellow-400"
+                >
+                  Move Back For Correction
+                </button>
+              </div>
+            );
+          })}
 
           {activeSearch && filteredRequests.length === 0 && (
             <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
