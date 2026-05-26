@@ -421,6 +421,14 @@ if (status === "Ready" && !request.final_pdf_url) {
             </div>
 
             <div className="flex gap-3">
+
+              <a
+  href="/admin/payments"
+  className="rounded border border-yellow-500/30 px-4 py-2 font-semibold text-yellow-400 hover:border-yellow-500 hover:bg-yellow-500/10"
+>
+  Payments
+</a>
+
               <a
                 href="/archive"
                 className="rounded bg-yellow-500 px-4 py-2 font-semibold text-black hover:bg-yellow-400"
