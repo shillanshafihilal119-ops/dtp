@@ -478,7 +478,7 @@ export default function TrackPage() {
                         (request.status === "In Progress" &&
                           (step === "Submitted" || step === "In Progress"));
 
-                      const isCorrection = Boolean(request.correction_notes);
+                      const isCorrection = Boolean(request.corrected_at);
 
 const stepTime =
   step === "Submitted"
@@ -512,7 +512,7 @@ const stepTime =
                                 active ? "text-yellow-400" : "text-gray-500"
                               }`}
                             >
-                              {step === "Submitted" && request.correction_notes
+                              {step === "Submitted" && isCorrection
   ? "Correction Submitted"
   : step}
                             </p>
