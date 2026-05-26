@@ -172,12 +172,38 @@ export default function ArchivePage() {
 
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyRevenue}>
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="revenue" />
-              </BarChart>
+              <BarChart
+  data={monthlyRevenue}
+  margin={{ top: 20, right: 20, left: 10, bottom: 10 }}
+>
+  <XAxis
+    dataKey="month"
+    stroke="#a1a1aa"
+    tick={{ fill: "#a1a1aa" }}
+  />
+
+  <YAxis
+    stroke="#a1a1aa"
+    tick={{ fill: "#a1a1aa" }}
+  />
+
+  <Tooltip
+    contentStyle={{
+      backgroundColor: "#09090b",
+      border: "1px solid rgba(234,179,8,0.3)",
+      color: "#ffffff",
+    }}
+    labelStyle={{
+      color: "#eab308",
+    }}
+  />
+
+  <Bar
+    dataKey="revenue"
+    fill="#eab308"
+    radius={[8, 8, 0, 0]}
+  />
+</BarChart>
             </ResponsiveContainer>
           </div>
         </div>

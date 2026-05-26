@@ -226,7 +226,7 @@ export default function TrackPage() {
   return (
     <main className="min-h-screen px-6 py-12 sm:px-10 animate-fade-in">
       {toast && (
-        <div className="fixed right-6 top-6 z-[9999] rounded-2xl border border-green-500/20 bg-zinc-950 p-5 shadow-xl">
+        <div className="fixed right-6 top-6 z-9999 rounded-2xl border border-green-500/20 bg-zinc-950 p-5 shadow-xl">
           <p className="font-bold text-green-400">✓ Success</p>
           <p className="mt-1 text-sm text-gray-300">{toast}</p>
         </div>
@@ -339,19 +339,83 @@ export default function TrackPage() {
                 </p>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="
+mb-6
+rounded-xl
+border
+border-yellow-500/10
+bg-black/40
+p-4">
+
+<p className="
+text-xs
+uppercase
+tracking-wide
+text-gray-500">
+
+Submitted On
+
+</p>
+
+<p className="
+mt-1
+font-semibold
+text-white">
+
+{
+new Date(
+request.created_at
+)
+
+.toLocaleString(
+"en-IN",
+
+{
+day: "2-digit",
+month: "short",
+year: "numeric",
+hour: "2-digit",
+minute: "2-digit",
+}
+
+)
+
+}
+
+</p>
+
+</div>
+
+              <div className="
+grid
+gap-4
+sm:grid-cols-2
+lg:grid-cols-3">
                 {[
-                  ["School", request.school],
-                  ["Class", request.class],
-                  ["Subject", request.subject],
-                  ["Session", request.session],
-                  ["Examination", request.examination],
-                  ["Marks", request.marks],
-                  ["Duration", request.duration],
-                  ["Medium", request.medium],
-                  ["Final Pages", request.page_count || 0],
-                  ["Total Amount", `₹${request.total_amount || 0}`],
-                ].map(([label, value]) => (
+  ["Teacher", request.teacher_name],
+  ["School", request.school],
+  ["Class", request.class],
+  ["Subject", request.subject],
+  ["Session", request.session],
+  ["Examination", request.examination],
+  ["Marks", request.marks],
+  ["Duration", request.duration],
+  ["Medium", request.medium],
+  ["Final Pages", request.page_count || 0],
+  [
+    "Rate / Page",
+    `₹${
+      request.page_count
+        ? Math.round(
+            Number(request.total_amount || 0) /
+              Number(request.page_count)
+          )
+        : 0
+    }`,
+  ],
+  ["Total Amount", `₹${request.total_amount || 0}`],
+  ["Paid Amount", `₹${request.paid_amount || 0}`],
+].map(([label, value]) => (
                   <div
                     key={label}
                     className="rounded-xl border border-yellow-500/10 bg-black/40 p-4"
@@ -406,7 +470,7 @@ export default function TrackPage() {
                   <div className="absolute left-0 top-5 h-1 w-full rounded-full bg-zinc-800" />
 
                   <div
-                    className={`absolute left-0 top-5 h-1 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-400 transition-all duration-[1800ms] ease-out ${
+                    className={`absolute left-0 top-5 h-1 rounded-full bg-linear-to-r from-yellow-600 to-yellow-400 transition-all duration-1800 ease-out ${
                       request.status === "Submitted"
                         ? "w-[0%]"
                         : request.status === "In Progress"
@@ -448,6 +512,49 @@ export default function TrackPage() {
                   )}
                 </div>
               </div>
+
+              {request.status !== "Delivered" && (
+  <div className="
+mt-6
+rounded-2xl
+border
+border-yellow-500/20
+bg-zinc-950
+p-5">
+
+<p className="
+font-bold
+text-yellow-500">
+
+Estimated Delivery
+
+</p>
+
+<p className="
+mt-2
+text-gray-300">
+
+{request.status ===
+"Submitted"
+
+? "Your request is waiting for work assignment. Estimated completion: within 1 day."
+
+: request.status ===
+"In Progress"
+
+? "Your paper formatting is in progress. Estimated completion: today."
+
+: request.status ===
+"Ready"
+
+? "Your paper is completed and waiting for payment / download."
+
+: ""}
+
+</p>
+
+</div>
+)}
 
               {request.preview_url && request.status !== "In Progress" && (
                 <div className="mt-8 flex flex-col items-center">
@@ -630,7 +737,7 @@ export default function TrackPage() {
 
                       setCorrectionNotes("");
 
-                      showToast("Correction request submitted successfully.");
+                      showToast("Latest correction note submitted successfully.");
                     }}
                     disabled={correctionLoading}
                     className="mt-3 rounded bg-yellow-500 px-4 py-2 text-black disabled:opacity-50"
@@ -649,8 +756,7 @@ export default function TrackPage() {
                   </p>
 
                   <p className="mt-2 text-gray-400">
-                    Your correction request has been received. It is now marked
-                    as Submitted and will be reviewed before work starts.
+                    Your latest correction note has been received. We will review the details and update you once the corrected paper is ready. Thank you for your patience.  
                   </p>
                 </div>
               )}

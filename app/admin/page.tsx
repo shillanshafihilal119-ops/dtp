@@ -564,7 +564,7 @@ router.push(
                   {request.correction_notes && (
                     <div className="mb-6 rounded-xl border border-yellow-500/20 bg-black/40 p-4">
                       <p className="font-semibold text-yellow-400">
-                        Correction Request
+                        Latest Correction Note
                       </p>
 
                       <p className="mt-2 text-sm text-gray-300">

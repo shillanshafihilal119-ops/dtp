@@ -141,8 +141,7 @@ export default function Home() {
     setSubmittedId(requestId);
     setLoading(false);
 
-    const whatsappMessage =
-`Vintage DTP
+    const whatsappMessage = `Vintage DTP
 
 Your request has been submitted successfully.
 
@@ -156,12 +155,10 @@ Keep this Request ID safe.
 
 Thank you for choosing Vintage DTP.`;
 
-window.open(
-`https://wa.me/91${phone}?text=${encodeURIComponent(
-whatsappMessage
-)}`,
-"_blank"
-);
+    window.open(
+      `https://wa.me/91${phone}?text=${encodeURIComponent(whatsappMessage)}`,
+      "_blank"
+    );
 
     setTimeout(() => {
       submittedBoxRef.current?.scrollIntoView({
@@ -266,7 +263,6 @@ whatsappMessage
           <div className="mb-10 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 shadow-lg">
             <div className="mb-6">
               <p className="text-2xl font-bold text-yellow-500">Pricing</p>
-
               <p className="mt-2 text-gray-400">
                 Rates are charged per final PDF page. The final amount is
                 calculated after your formatted PDF is uploaded by admin.
@@ -390,70 +386,98 @@ whatsappMessage
             </button>
 
             {submittedId && (
-  <div
-    ref={submittedBoxRef}
-    className="rounded-2xl border border-green-500/30 bg-black/60 p-5 text-white sm:col-span-2"
-  >
-    <p className="text-xl font-bold text-green-400">
-      ✓ Request Submitted Successfully
-    </p>
+              <div
+                ref={submittedBoxRef}
+                className="rounded-2xl border border-green-500/30 bg-black/60 p-5 text-white sm:col-span-2"
+              >
+                <p className="text-xl font-bold text-green-400">
+                  ✓ Request Submitted Successfully
+                </p>
 
-    <p className="mt-3 text-sm text-gray-300">
-      Your paper request has been received. Please keep your Request ID safe.
-    </p>
+                <p className="mt-3 text-sm text-gray-300">
+                  Your paper request has been received. Please keep your Request ID safe.
+                </p>
 
-    <div className="mt-5 rounded-xl border border-yellow-500/20 bg-zinc-950 p-4">
-      <p className="text-xs uppercase tracking-wide text-gray-500">
-        Request ID
-      </p>
+                <div className="mt-5 rounded-xl border border-yellow-500/20 bg-zinc-950 p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">
+                    Request ID
+                  </p>
 
-      <p className="mt-2 break-all text-2xl font-bold text-yellow-500">
-        {submittedId}
-      </p>
-    </div>
+                  <p className="mt-2 break-all text-2xl font-bold text-yellow-500">
+                    {submittedId}
+                  </p>
+                </div>
 
-    <div className="mt-5 grid gap-3 sm:grid-cols-3">
-      <button
-        type="button"
-        onClick={async () => {
-          await navigator.clipboard.writeText(submittedId);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 1500);
-        }}
-        className="rounded bg-yellow-500 px-4 py-3 font-semibold text-black hover:bg-yellow-400"
-      >
-        {copied ? "Copied!" : "Copy ID"}
-      </button>
+                <div className="mt-5 rounded-xl border border-yellow-500/20 bg-zinc-950 p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">
+                    Pricing Reminder
+                  </p>
 
-      <button
-        type="button"
-        onClick={async () => {
-          await navigator.clipboard.writeText(
-            `https://dtp-gules.vercel.app/track`
-          );
-          setCopied(true);
-          setTimeout(() => setCopied(false), 1500);
-        }}
-        className="rounded bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-500"
-      >
-        Copy Track Link
-      </button>
+                  <p className="mt-2 text-sm text-gray-300">
+                    Final amount depends on the final PDF page count.
+                  </p>
 
-      <a
-        href="/track"
-        className="rounded bg-green-600 px-4 py-3 text-center font-semibold text-white hover:bg-green-500"
-      >
-        Track Request
-      </a>
-    </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                    {prices.map((price) => (
+                      <div
+                        key={price.medium}
+                        className="rounded-xl border border-yellow-500/10 bg-black/40 p-3"
+                      >
+                        <p className="font-semibold text-yellow-400">
+                          {price.medium}
+                        </p>
 
-    <p className="mt-4 text-xs text-gray-500">
-      WhatsApp opens with a ready message, but the message is sent only after
-      tapping send in WhatsApp.
-    </p>
-  </div>
+                        <p className="mt-1 text-lg font-bold text-white">
+                          ₹{price.rate_per_page}
+                        </p>
+
+                        <p className="text-xs text-gray-500">per page</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(submittedId);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 1500);
+                    }}
+                    className="rounded bg-yellow-500 px-4 py-3 font-semibold text-black hover:bg-yellow-400"
+                  >
+                    {copied ? "Copied!" : "Copy ID"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(
+                        `https://dtp-gules.vercel.app/track`
+                      );
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 1500);
+                    }}
+                    className="rounded bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-500"
+                  >
+                    Copy Track Link
+                  </button>
+
+                  <a
+                    href="/track"
+                    className="rounded bg-green-600 px-4 py-3 text-center font-semibold text-white hover:bg-green-500"
+                  >
+                    Track Request
+                  </a>
+                </div>
+
+                <p className="mt-4 text-xs text-gray-500">
+                  WhatsApp opens with a ready message, but the message is sent only after
+                  tapping send in WhatsApp.
+                </p>
+              </div>
             )}
-            
           </form>
         </section>
       </Reveal>
@@ -467,7 +491,7 @@ whatsappMessage
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
               ["📝", "Upload Paper", "Submit handwritten question paper details and images."],
-              ["⚙️", "Formatting", "We professionally format Urdu and Kashmiri papers."],
+              ["⚙️", "Formatting", "We professionally format Urdu, Kashmiri and English papers."],
               ["👀", "Preview", "Preview image appears before final delivery."],
               ["📄", "Final PDF", "Download the final printable PDF after completion."],
             ].map(([icon, title, text]) => (
@@ -494,7 +518,7 @@ whatsappMessage
             <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-6">
               <h3 className="font-bold text-yellow-400">Professional Formatting</h3>
               <p className="mt-3 text-gray-400">
-                Clean Urdu and Kashmiri layouts with proper spacing and structure.
+                Clean Urdu, Kashmiri and English layouts with proper spacing and structure.
               </p>
             </div>
 
