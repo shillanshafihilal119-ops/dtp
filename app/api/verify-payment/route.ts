@@ -45,13 +45,26 @@ export async function POST(req: Request) {
         ? Number(request.extra_amount_due)
         : Number(request.total_amount);
 
-    const existingPaidAmount =
-      Number(request.paid_amount || 0);
+    const existingPaidAmount = Number(request.paid_amount || 0);
 
     const newPaidAmount =
       request.payment_status === "Partially Paid"
         ? existingPaidAmount + payableAmount
         : Number(request.total_amount || payableAmount);
+
+    const { error: paymentUpdateError } = await supabase
+      .from("payments")
+      .update({
+        razorpay_payment_id,
+        status: "paid",
+        paid_at: new Date().toISOString(),
+      })
+      .eq("razorpay_order_id", razorpay_order_id);
+
+    if (paymentUpdateError) {
+      console.log("Payment record update error:", paymentUpdateError);
+      return NextResponse.json({ success: false }, { status: 500 });
+    }
 
     const { error: updateError } = await supabase
       .from("paper_requests")

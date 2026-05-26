@@ -38,11 +38,13 @@ export async function POST(req: Request) {
       );
     }
 
-    const amount =
+    const isExtraPayment =
       request.payment_status === "Partially Paid" &&
-      Number(request.extra_amount_due) > 0
-        ? Number(request.extra_amount_due)
-        : Number(request.total_amount);
+      Number(request.extra_amount_due) > 0;
+
+    const amount = isExtraPayment
+      ? Number(request.extra_amount_due)
+      : Number(request.total_amount);
 
     if (!amount || amount <= 0) {
       return NextResponse.json(
@@ -59,8 +61,29 @@ export async function POST(req: Request) {
       receipt: `vintage_${request.id}_${Date.now()}`,
       notes: {
         requestId: String(request.id),
+        paymentType: isExtraPayment ? "extra" : "initial",
       },
     });
+
+    const { error: paymentInsertError } = await supabase
+      .from("payments")
+      .insert({
+        request_id: request.id,
+        razorpay_order_id: order.id,
+        amount,
+        currency: "INR",
+        status: "created",
+        payment_type: isExtraPayment ? "extra" : "initial",
+      });
+
+    if (paymentInsertError) {
+      console.log("Payment insert error:", paymentInsertError);
+
+      return NextResponse.json(
+        { error: "Payment order created but could not be recorded" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(order);
   } catch (error) {
