@@ -423,13 +423,6 @@ if (status === "Ready" && !request.final_pdf_url) {
             <div className="flex gap-3">
 
               <a
-  href="/admin/payments"
-  className="rounded border border-yellow-500/30 px-4 py-2 font-semibold text-yellow-400 hover:border-yellow-500 hover:bg-yellow-500/10"
->
-  Payments
-</a>
-
-              <a
                 href="/archive"
                 className="rounded bg-yellow-500 px-4 py-2 font-semibold text-black hover:bg-yellow-400"
               >
@@ -447,51 +440,6 @@ if (status === "Ready" && !request.final_pdf_url) {
                 Logout
               </button>
             </div>
-          </div>
-
-          <div className="mb-8 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 shadow-lg">
-            <p className="text-xl font-bold text-yellow-500">Pricing Settings</p>
-            <p className="mt-2 text-sm text-gray-400">
-              Edit per-page rates. These rates are used when admin uploads the final PDF.
-            </p>
-
-            <div className="mt-5 grid gap-4 sm:grid-cols-3">
-              {prices.map((price, index) => (
-                <div
-                  key={price.medium}
-                  className="rounded-xl border border-yellow-500/10 bg-black/40 p-4"
-                >
-                  <p className="mb-2 font-semibold text-yellow-400">
-                    {price.medium}
-                  </p>
-
-                  <input
-                    type="number"
-                    min={1}
-                    value={price.rate_per_page}
-                    onChange={(e) => {
-                      const updated = [...prices];
-                      updated[index] = {
-                        ...updated[index],
-                        rate_per_page: Number(e.target.value),
-                      };
-                      setPrices(updated);
-                    }}
-                    className="w-full rounded border border-yellow-500/20 bg-black/60 p-3 text-white outline-none focus:border-yellow-500"
-                  />
-
-                  <p className="mt-2 text-xs text-gray-500">₹ per page</p>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={savePricing}
-              disabled={savingPrices}
-              className="mt-5 rounded bg-yellow-500 px-5 py-3 font-bold text-black hover:bg-yellow-400 disabled:opacity-50"
-            >
-              {savingPrices ? "Saving..." : "Save Pricing"}
-            </button>
           </div>
 
           <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -523,6 +471,58 @@ if (status === "Ready" && !request.final_pdf_url) {
               </div>
             ))}
           </div>
+
+          <div className="mb-8 grid gap-4 sm:grid-cols-2">
+  <a
+    href="/admin/pricing"
+    className="group relative overflow-hidden rounded-2xl border border-yellow-500/30 bg-linear-to-br from-yellow-500/15 via-zinc-950 to-zinc-950 p-6 shadow-[0_0_24px_rgba(234,179,8,0.08)] transition hover:border-yellow-500/70 hover:shadow-[0_0_30px_rgba(234,179,8,0.16)]"
+  >
+    <div className="flex items-center justify-between gap-4">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-wide text-yellow-500/80">
+          Manage Rates
+        </p>
+
+        <p className="mt-2 text-2xl font-bold text-yellow-400">
+          Pricing Settings
+        </p>
+
+        <p className="mt-2 text-sm text-gray-400">
+          Update per-page rates for every medium.
+        </p>
+      </div>
+
+      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-500 text-2xl font-black text-black transition group-hover:scale-105">
+        ₹
+      </span>
+    </div>
+  </a>
+
+  <a
+    href="/admin/payments"
+    className="group relative overflow-hidden rounded-2xl border border-emerald-500/25 bg-linear-to-br from-emerald-500/12 via-zinc-950 to-zinc-950 p-6 shadow-[0_0_24px_rgba(16,185,129,0.07)] transition hover:border-emerald-500/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.14)]"
+  >
+    <div className="flex items-center justify-between gap-4">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-wide text-emerald-400/80">
+          Money Log
+        </p>
+
+        <p className="mt-2 text-2xl font-bold text-emerald-400">
+          Payment History
+        </p>
+
+        <p className="mt-2 text-sm text-gray-400">
+          Review payments, attempts, and extra charges.
+        </p>
+      </div>
+
+      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500 text-2xl font-black text-black transition group-hover:scale-105">
+        ₹
+      </span>
+    </div>
+  </a>
+</div>
 
           <div className="mb-8 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
