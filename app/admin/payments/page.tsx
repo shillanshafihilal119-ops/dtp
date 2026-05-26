@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 
 export default function AdminPaymentsPage() {
   const [payments, setPayments] = useState<any[]>([]);
@@ -15,34 +14,32 @@ export default function AdminPaymentsPage() {
   }, []);
 
   async function fetchPayments() {
-    setLoading(true);
+  setLoading(true);
 
-    const { data, error } = await supabase
-      .from("payments")
-      .select(
-        `
-        *,
-        paper_requests (
-          request_id,
-          teacher_name,
-          phone,
-          subject,
-          class,
-          payment_status
-        )
-      `
-      )
-      .order("created_at", { ascending: false });
+  try {
+    const res = await fetch("/api/admin-payments", {
+      headers: {
+        "x-admin-password": process.env.NEXT_PUBLIC_ADMIN_PASSWORD!,
+      },
+    });
 
-    setLoading(false);
+    const result = await res.json();
 
-    if (error) {
-      console.log(error);
-      alert("Failed to load payment history");
-    } else {
-      setPayments(data || []);
+    if (!res.ok) {
+      alert(result.error || "Failed to load payment history");
+      setPayments([]);
+      return;
     }
+
+    setPayments(result.payments || []);
+  } catch (error) {
+    console.log(error);
+    alert("Failed to load payment history");
+    setPayments([]);
+  } finally {
+    setLoading(false);
   }
+}
 
   function formatDate(value: string | null | undefined) {
     if (!value) return "-";
@@ -92,6 +89,58 @@ export default function AdminPaymentsPage() {
         );
       })
     : payments;
+
+    const requestPaymentRows = Object.values(
+  filteredPayments.reduce((acc: any, payment: any) => {
+    const requestKey =
+      payment.request_id || payment.paper_requests?.request_id || payment.id;
+
+    if (!acc[requestKey]) {
+      acc[requestKey] = {
+        request: payment.paper_requests,
+        created_at: payment.created_at,
+        paid_at: payment.paid_at,
+        orderIds: [],
+        paymentIds: [],
+        firstAmount: 0,
+        correctionAmount: 0,
+        totalAmount: 0,
+      };
+    }
+
+    acc[requestKey].created_at =
+      payment.created_at < acc[requestKey].created_at
+        ? payment.created_at
+        : acc[requestKey].created_at;
+
+    acc[requestKey].paid_at =
+      payment.paid_at && payment.paid_at > (acc[requestKey].paid_at || "")
+        ? payment.paid_at
+        : acc[requestKey].paid_at;
+
+    if (payment.razorpay_order_id) {
+      acc[requestKey].orderIds.push(payment.razorpay_order_id);
+    }
+
+    if (payment.razorpay_payment_id) {
+      acc[requestKey].paymentIds.push(payment.razorpay_payment_id);
+    }
+
+    if (payment.status === "paid") {
+      const amount = Number(payment.amount || 0);
+
+      if (payment.payment_type === "extra") {
+        acc[requestKey].correctionAmount += amount;
+      } else {
+        acc[requestKey].firstAmount += amount;
+      }
+
+      acc[requestKey].totalAmount += amount;
+    }
+
+    return acc;
+  }, {})
+);
 
   const paidPayments = payments.filter((payment) => payment.status === "paid");
   const createdPayments = payments.filter(
@@ -226,101 +275,117 @@ export default function AdminPaymentsPage() {
           </div>
         )}
 
-        {!loading && (
-          <div className="space-y-5">
-            {filteredPayments.map((payment: any) => {
-              const request = payment.paper_requests;
+{!loading && (
+  <div className="overflow-hidden rounded-2xl border border-yellow-500/20 bg-zinc-950 shadow-lg">
+    <div className="grid grid-cols-[0.9fr_1.2fr_1.35fr_1.2fr_0.75fr_0.8fr_0.85fr] items-center gap-4 bg-black/50 px-5 py-3 text-xs font-bold uppercase text-gray-500">
+      <p>Date</p>
+      <p>Customer</p>
+      <p>Request</p>
+      <p>Payment</p>
+      <p className="text-right">First</p>
+      <p className="text-right">Extra</p>
+      <p className="text-right">Total</p>
+    </div>
 
-              return (
-                <div
-                  key={payment.id}
-                  className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 shadow-lg"
-                >
-                  <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="text-2xl font-bold">
-                          ₹{payment.amount || 0}
-                        </h2>
+    <div className="divide-y divide-yellow-500/10">
+      {requestPaymentRows.map((row: any, index: number) => {
+        const orderId = row.orderIds[0] || "-";
+        const paymentId = row.paymentIds[0] || "-";
+        const shortOrderId =
+          orderId !== "-" ? `${orderId.slice(0, 12)}...` : "-";
+        const shortPaymentId =
+          paymentId !== "-" ? `${paymentId.slice(0, 10)}...` : "-";
 
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-bold ${
-                            payment.status === "paid"
-                              ? "bg-green-500 text-black"
-                              : payment.status === "created"
-                              ? "bg-orange-500 text-black"
-                              : "bg-red-500 text-white"
-                          }`}
-                        >
-                          {payment.status}
-                        </span>
+        return (
+          <div
+            key={`${row.request?.request_id || "payment"}-${index}`}
+            className="grid grid-cols-[0.9fr_1.2fr_1.35fr_1.2fr_0.75fr_0.8fr_0.85fr] items-center gap-4 px-5 py-4 text-sm transition hover:bg-yellow-500/5"
+          >
+            <div>
+  {(() => {
+    const dateValue = row.paid_at || row.created_at;
+    const dateText = new Date(dateValue).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+    const timeText = new Date(dateValue).toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
-                        <span className="rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1 text-xs font-bold text-yellow-400">
-                          {payment.payment_type || "initial"}
-                        </span>
-                      </div>
+    return (
+      <>
+        <p className="font-semibold text-white">{dateText}</p>
+        <p className="mt-0.5 text-xs text-gray-500">{timeText}</p>
+      </>
+    );
+  })()}
+</div>
 
-                      <p className="mt-2 text-sm text-gray-400">
-                        {request?.teacher_name || "Unknown teacher"} ·{" "}
-                        {request?.request_id || "No request ID"}
-                      </p>
-                    </div>
+            <div>
+              <p className="truncate font-semibold text-white">
+                {row.request?.teacher_name || "Unknown"}
+              </p>
 
-                    <div className="text-left text-sm text-gray-400 sm:text-right">
-                      <p>Created: {formatDate(payment.created_at)}</p>
-                      <p>Paid: {formatDate(payment.paid_at)}</p>
-                    </div>
-                  </div>
+              <p className="mt-0.5 truncate text-xs text-gray-500">
+                {row.request?.phone || "-"}
+              </p>
+            </div>
 
-                  <div className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
-                    <p>
-                      <b>Order ID:</b>{" "}
-                      <span className="break-all text-gray-300">
-                        {payment.razorpay_order_id || "-"}
-                      </span>
-                    </p>
+            <div>
+              <p className="truncate font-semibold text-white">
+                {row.request?.request_id || "-"}
+              </p>
 
-                    <p>
-                      <b>Payment ID:</b>{" "}
-                      <span className="break-all text-gray-300">
-                        {payment.razorpay_payment_id || "-"}
-                      </span>
-                    </p>
+              <p className="mt-0.5 truncate text-xs text-gray-500">
+                {row.request?.subject || "-"} · {row.request?.class || "-"}
+              </p>
+            </div>
 
-                    <p>
-                      <b>Request Payment:</b>{" "}
-                      {request?.payment_status || "-"}
-                    </p>
+            <div>
+              <p className="truncate text-xs text-gray-300" title={orderId}>
+                O: {shortOrderId}
+              </p>
 
-                    <p>
-                      <b>Phone:</b> {request?.phone || "-"}
-                    </p>
+              <p className="mt-1 truncate text-xs text-gray-500" title={paymentId}>
+                P: {shortPaymentId}
+              </p>
+            </div>
 
-                    <p>
-                      <b>Subject:</b> {request?.subject || "-"}
-                    </p>
+            <p className="text-right font-bold text-white">
+              ₹{row.firstAmount}
+            </p>
 
-                    <p>
-                      <b>Class:</b> {request?.class || "-"}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+            <p
+              className={`text-right font-bold ${
+                row.correctionAmount > 0 ? "text-orange-400" : "text-gray-600"
+              }`}
+            >
+              {row.correctionAmount > 0 ? `₹${row.correctionAmount}` : "-"}
+            </p>
 
-            {filteredPayments.length === 0 && (
-              <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-8 text-center">
-                <p className="text-xl font-bold text-yellow-500">
-                  No payment records found
-                </p>
-
-                <p className="mt-2 text-gray-400">
-                  Payment attempts will appear here after customers open Razorpay checkout.
-                </p>
-              </div>
-            )}
+            <p className="text-right text-lg font-bold text-emerald-400">
+              ₹{row.totalAmount}
+            </p>
           </div>
-        )}
+        );
+      })}
+
+      {requestPaymentRows.length === 0 && (
+        <div className="p-8 text-center">
+          <p className="text-xl font-bold text-yellow-500">
+            No payment records found
+          </p>
+
+          <p className="mt-2 text-gray-400">
+            Payment attempts will appear here after customers open Razorpay checkout.
+          </p>
+        </div>
+      )}
+    </div>
+  </div>
+)}
       </div>
     </main>
   );

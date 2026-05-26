@@ -2,14 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
 
 export default function ArchivePage() {
   const [requests, setRequests] = useState<any[]>([]);
@@ -35,9 +27,7 @@ export default function ArchivePage() {
     }
   }
 
-  function getPaidAmount(request: any) {
-    return Number(request.paid_amount || request.total_amount || 0);
-  }
+ 
 
   function handleSearch() {
     if (!search.trim()) {
@@ -72,36 +62,6 @@ export default function ArchivePage() {
       })
     : requests;
 
-  const totalRevenue = requests.reduce((sum: number, request: any) => {
-    if (request.payment_status === "Paid") {
-      return sum + getPaidAmount(request);
-    }
-
-    return sum;
-  }, 0);
-
-  const monthlyRevenue = Object.values(
-    requests.reduce((acc: any, request: any) => {
-      const month = new Date(request.created_at).toLocaleString("default", {
-        month: "short",
-        year: "numeric",
-      });
-
-      if (!acc[month]) {
-        acc[month] = {
-          month,
-          revenue: 0,
-        };
-      }
-
-      if (request.payment_status === "Paid") {
-        acc[month].revenue += getPaidAmount(request);
-      }
-
-      return acc;
-    }, {})
-  );
-
   return (
     <main className="min-h-screen px-6 py-12 sm:px-10 animate-fade-in">
       <div className="mx-auto max-w-6xl">
@@ -128,7 +88,7 @@ export default function ArchivePage() {
           </a>
         </div>
 
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
             <p className="text-sm text-gray-400">Delivered</p>
             <p className="mt-2 text-3xl font-bold text-green-400">
@@ -151,53 +111,10 @@ export default function ArchivePage() {
           </div>
 
           <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
-            <p className="text-sm text-gray-400">Revenue</p>
-            <p className="mt-2 text-3xl font-bold text-emerald-400">
-              ₹{totalRevenue}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5">
             <p className="text-sm text-gray-400">Total Archive</p>
             <p className="mt-2 text-3xl font-bold text-blue-400">
               {requests.length}
             </p>
-          </div>
-        </div>
-
-        <div className="mb-8 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6">
-          <h3 className="mb-6 text-2xl font-bold text-yellow-500">
-            Monthly Revenue
-          </h3>
-
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={monthlyRevenue}
-                margin={{ top: 20, right: 20, left: 10, bottom: 10 }}
-              >
-                <XAxis
-                  dataKey="month"
-                  stroke="#a1a1aa"
-                  tick={{ fill: "#a1a1aa" }}
-                />
-
-                <YAxis stroke="#a1a1aa" tick={{ fill: "#a1a1aa" }} />
-
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#09090b",
-                    border: "1px solid rgba(234,179,8,0.3)",
-                    color: "#ffffff",
-                  }}
-                  labelStyle={{
-                    color: "#eab308",
-                  }}
-                />
-
-                <Bar dataKey="revenue" fill="#eab308" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
           </div>
         </div>
 
@@ -256,7 +173,7 @@ export default function ArchivePage() {
         <div className="space-y-6">
           {filteredRequests.map((request: any) => {
             const totalAmount = Number(request.total_amount || 0);
-            const paidAmount = getPaidAmount(request);
+            const paidAmount = Number(request.paid_amount || request.total_amount || 0);
             const previousAmount = Math.max(paidAmount - totalAmount, 0);
             const correctionAmount = totalAmount;
             const hasCorrectionBreakdown =
