@@ -985,7 +985,7 @@ Thank you for choosing Vintage DTP.`
                             <img
                               src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/paper-previews/${request.preview_url}`}
                               alt="Preview"
-                              className="w-full transition-all duration-700 group-hover:scale-105"
+                              className="h-auto w-full transition-all duration-700 group-hover:scale-105"
                             />
 
                             <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/40 to-transparent opacity-0 transition group-hover:opacity-100" />
@@ -1005,7 +1005,7 @@ Thank you for choosing Vintage DTP.`
                         <img
                           src={uploadedPaperUrl}
                           alt="Uploaded paper"
-                          className="w-full rounded-xl transition-all duration-700 group-hover:scale-105"
+                          className="h-auto w-full rounded-xl transition-all duration-700 group-hover:scale-105"
                         />
 
                         <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/50 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />

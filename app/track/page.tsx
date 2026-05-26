@@ -558,7 +558,7 @@ const stepTime =
                     <img
                       src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/paper-previews/${request.preview_url}`}
                       alt="Final Paper Preview"
-                      className="w-full rounded-xl transition-all duration-700 group-hover:scale-105"
+                      className="h-auto w-full rounded-xl transition-all duration-700 group-hover:scale-105"
                     />
                   </div>
                 </div>

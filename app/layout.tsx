@@ -14,6 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://dtp-gules.vercel.app"),
+
   title:
     "Vintage DTP | Urdu & Kashmiri Question Paper Formatting",
 
