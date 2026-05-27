@@ -242,7 +242,7 @@ export default function ArchivePage() {
                         {label}
                       </p>
 
-                      <p className="mt-1 break-words font-semibold text-white">
+                      <p className="mt-1 wrap-break-word font-semibold text-white">
                         {value || "-"}
                       </p>
                     </div>

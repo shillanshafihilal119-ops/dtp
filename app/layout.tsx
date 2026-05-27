@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ScrollToTop from "./components/scroll-to-top";
+import AdminLoginLink from "./components/admin-login-link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,17 +45,17 @@ export default function RootLayout({
           <div className="max-w-6xl mx-auto flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
 
             <a
-  href="/"
-  className="group"
->
-  <h1 className="text-xl font-bold text-yellow-500 transition group-hover:text-yellow-400 sm:text-2xl">
-    Vintage DTP
-  </h1>
+              href="/"
+              className="group"
+            >
+              <h1 className="text-xl font-bold text-yellow-500 transition group-hover:text-yellow-400 sm:text-2xl">
+                Vintage DTP
+              </h1>
 
-  <p className="text-xs text-gray-400 sm:text-sm">
-    Urdu & Kashmiri Paper Formatting
-  </p>
-</a>
+              <p className="text-xs text-gray-400 sm:text-sm">
+                Urdu & Kashmiri Paper Formatting
+              </p>
+            </a>
 
             <nav className="flex w-full items-center justify-between gap-3 text-sm sm:w-auto sm:justify-end sm:gap-8 sm:text-base">
               <a
@@ -71,13 +72,7 @@ export default function RootLayout({
                 Track
               </a>
 
-              <a
-                href="/admin-login"
-                className="rounded bg-yellow-500 px-3 py-2 text-sm font-semibold text-black transition hover:bg-yellow-400 sm:px-4 sm:text-base"
-              >
-                Admin Login
-              </a>
-
+              <AdminLoginLink />
             </nav>
 
           </div>

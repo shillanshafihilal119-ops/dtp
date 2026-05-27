@@ -131,7 +131,7 @@ export default function AdminPricingPage() {
                     Medium
                   </p>
 
-                  <p className="mt-1 break-words text-xl font-bold text-yellow-400 sm:text-2xl">
+                  <p className="mt-1 wrap-break-word text-xl font-bold text-yellow-400 sm:text-2xl">
                     {price.medium}
                   </p>
 
