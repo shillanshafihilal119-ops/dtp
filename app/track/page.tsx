@@ -689,6 +689,11 @@ export default function TrackPage() {
                       Need Correction?
                     </p>
 
+                    <p className="mt-2 text-sm leading-6 text-gray-400">
+                      Submit correction here or send it on WhatsApp with your
+                      Request ID.
+                    </p>
+
                     <textarea
                       placeholder="Need corrections? Write here..."
                       value={correctionNotes}
@@ -696,60 +701,77 @@ export default function TrackPage() {
                       className="mt-4 w-full rounded border border-yellow-500/20 bg-black p-3 text-white placeholder:text-gray-500 outline-none focus:border-yellow-500"
                     />
 
-                    <button
-                      onClick={async () => {
-                        if (!correctionNotes.trim()) {
-                          alert("Please write correction details first.");
-                          return;
-                        }
+                    <div className="mt-3 grid gap-3 sm:flex sm:flex-wrap">
+                      <button
+                        onClick={async () => {
+                          if (!correctionNotes.trim()) {
+                            alert("Please write correction details first.");
+                            return;
+                          }
 
-                        setCorrectionLoading(true);
+                          setCorrectionLoading(true);
 
-                        await supabase
-                          .from("paper_requests")
-                          .update({
-                            status: "Submitted",
-                            final_pdf_url: null,
-                            preview_url: null,
-                            correction_notes: correctionNotes,
-                            corrected_at: new Date().toISOString(),
-                            started_at: null,
-                            ready_at: null,
-                            delivered_at: null,
-                          })
-                          .eq("request_id", request.request_id);
+                          const correctedAt = new Date().toISOString();
 
-                        setCorrectionLoading(false);
+                          await supabase
+                            .from("paper_requests")
+                            .update({
+                              status: "Submitted",
+                              final_pdf_url: null,
+                              preview_url: null,
+                              correction_notes: correctionNotes,
+                              corrected_at: correctedAt,
+                              started_at: null,
+                              ready_at: null,
+                              delivered_at: null,
+                            })
+                            .eq("request_id", request.request_id);
 
-                        setRequests((prev) =>
-                          prev.map((item) =>
-                            item.request_id === request.request_id
-                              ? {
-                                  ...item,
-                                  status: "Submitted",
-                                  final_pdf_url: null,
-                                  preview_url: null,
-                                  correction_notes: correctionNotes,
-                                  corrected_at: new Date().toISOString(),
-                                  started_at: null,
-                                  ready_at: null,
-                                  delivered_at: null,
-                                }
-                              : item
-                          )
-                        );
+                          setCorrectionLoading(false);
 
-                        setCorrectionNotes("");
+                          setRequests((prev) =>
+                            prev.map((item) =>
+                              item.request_id === request.request_id
+                                ? {
+                                    ...item,
+                                    status: "Submitted",
+                                    final_pdf_url: null,
+                                    preview_url: null,
+                                    correction_notes: correctionNotes,
+                                    corrected_at: correctedAt,
+                                    started_at: null,
+                                    ready_at: null,
+                                    delivered_at: null,
+                                  }
+                                : item
+                            )
+                          );
 
-                        showToast("Latest correction note submitted successfully.");
-                      }}
-                      disabled={correctionLoading}
-                      className="mt-3 w-full rounded bg-yellow-500 px-4 py-2 text-black disabled:opacity-50 sm:w-auto"
-                    >
-                      {correctionLoading
-                        ? "Submitting..."
-                        : "Request Correction"}
-                    </button>
+                          setCorrectionNotes("");
+
+                          showToast("Latest correction note submitted successfully.");
+                        }}
+                        disabled={correctionLoading}
+                        className="rounded bg-yellow-500 px-4 py-3 font-semibold text-black disabled:opacity-50 sm:py-2"
+                      >
+                        {correctionLoading ? "Submitting..." : "Submit Here"}
+                      </button>
+
+                      <a
+                        href={`https://wa.me/917889410756?text=${encodeURIComponent(
+                          `Vintage DTP Correction Request
+
+Request ID: ${request.request_id}
+
+Please write your correction details below:
+`
+                        )}`}
+                        target="_blank"
+                        className="rounded bg-green-600 px-4 py-3 text-center font-semibold text-white hover:bg-green-500 sm:py-2"
+                      >
+                        Send on WhatsApp
+                      </a>
+                    </div>
                   </div>
                 )}
 

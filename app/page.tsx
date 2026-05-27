@@ -63,8 +63,11 @@ export default function Home() {
     e.preventDefault();
 
     const nameRegex = /^[A-Za-z\u0600-\u06FF\s]+$/;
+    const schoolRegex = /^[A-Za-z\u0600-\u06FF\s]+$/;
+    const subjectRegex = /^[A-Za-z\u0600-\u06FF\s]+$/;
     const phoneRegex = /^[0-9]{10,12}$/;
     const marksRegex = /^[0-9]+$/;
+    const sessionRegex = /^[0-9]+(-[0-9]+)?$/;
 
     if (
       !teacherName ||
@@ -85,6 +88,21 @@ export default function Home() {
 
     if (!nameRegex.test(teacherName)) {
       alert("Teacher name should contain letters only.");
+      return;
+    }
+
+    if (!schoolRegex.test(school)) {
+      alert("School name should contain letters only.");
+      return;
+    }
+
+    if (!subjectRegex.test(subject)) {
+      alert("Subject should contain letters only.");
+      return;
+    }
+
+    if (!sessionRegex.test(session)) {
+      alert("Session should contain numbers only. A hyphen is allowed, like 2025-26.");
       return;
     }
 
@@ -343,15 +361,99 @@ export default function Home() {
           onSubmit={handleSubmit}
           className="grid w-full gap-3 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 shadow-lg sm:grid-cols-2 sm:gap-4 sm:p-8"
         >
-          <input required type="text" placeholder="Teacher Name" value={teacherName} onChange={(e) => setTeacherName(e.target.value)} className="rounded border p-3" />
-          <input required type="text" placeholder="School Name" value={school} onChange={(e) => setSchool(e.target.value)} className="rounded border p-3" />
-          <input required type="tel" placeholder="Phone Number" value={phone} maxLength={12} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))} className="rounded border p-3" />
-          <input required type="text" placeholder="Class" value={studentClass} onChange={(e) => setStudentClass(e.target.value)} className="rounded border p-3" />
-          <input required type="text" placeholder="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} className="rounded border p-3" />
-          <input required type="text" placeholder="Session" value={session} onChange={(e) => setSession(e.target.value)} className="rounded border p-3" />
-          <input required type="text" placeholder="Examination" value={examination} onChange={(e) => setExamination(e.target.value)} className="rounded border p-3" />
-          <input required type="text" placeholder="Total Marks" value={marks} onChange={(e) => setMarks(e.target.value.replace(/\D/g, ""))} className="rounded border p-3" />
-          <input required type="text" placeholder="Duration" value={duration} onChange={(e) => setDuration(e.target.value)} className="rounded border p-3" />
+          <input
+            required
+            type="text"
+            placeholder="Teacher Name"
+            value={teacherName}
+            onChange={(e) =>
+              setTeacherName(
+                e.target.value.replace(/[^A-Za-z\u0600-\u06FF\s]/g, "")
+              )
+            }
+            className="rounded border p-3"
+          />
+
+          <input
+            required
+            type="text"
+            placeholder="School Name"
+            value={school}
+            onChange={(e) =>
+              setSchool(
+                e.target.value.replace(/[^A-Za-z\u0600-\u06FF\s]/g, "")
+              )
+            }
+            className="rounded border p-3"
+          />
+
+          <input
+            required
+            type="tel"
+            placeholder="Phone Number"
+            value={phone}
+            maxLength={12}
+            onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+            className="rounded border p-3"
+          />
+
+          <input
+            required
+            type="text"
+            placeholder="Class"
+            value={studentClass}
+            onChange={(e) => setStudentClass(e.target.value)}
+            className="rounded border p-3"
+          />
+
+          <input
+            required
+            type="text"
+            placeholder="Subject"
+            value={subject}
+            onChange={(e) =>
+              setSubject(
+                e.target.value.replace(/[^A-Za-z\u0600-\u06FF\s]/g, "")
+              )
+            }
+            className="rounded border p-3"
+          />
+
+          <input
+            required
+            type="text"
+            placeholder="Session"
+            value={session}
+            onChange={(e) => setSession(e.target.value.replace(/[^0-9-]/g, ""))}
+            className="rounded border p-3"
+          />
+
+          <input
+            required
+            type="text"
+            placeholder="Examination"
+            value={examination}
+            onChange={(e) => setExamination(e.target.value)}
+            className="rounded border p-3"
+          />
+
+          <input
+            required
+            type="text"
+            placeholder="Total Marks"
+            value={marks}
+            onChange={(e) => setMarks(e.target.value.replace(/\D/g, ""))}
+            className="rounded border p-3"
+          />
+
+          <input
+            required
+            type="text"
+            placeholder="Duration"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            className="rounded border p-3"
+          />
 
           <select
             required

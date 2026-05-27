@@ -57,17 +57,17 @@ export default function RootLayout({
               </p>
             </a>
 
-            <nav className="flex w-full items-center justify-between gap-3 text-sm sm:w-auto sm:justify-end sm:gap-8 sm:text-base">
+            <nav className="flex w-fit items-center gap-6 text-sm sm:w-auto sm:justify-end sm:gap-8 sm:text-base">
               <a
                 href="/"
-                className="hover:text-yellow-400 transition"
+                className="rounded-full border border-yellow-500/20 px-4 py-2 text-gray-200 transition hover:border-yellow-500 hover:text-yellow-400"
               >
                 Home
               </a>
 
               <a
                 href="/track"
-                className="hover:text-yellow-400 transition"
+                className="rounded-full border border-yellow-500/20 px-4 py-2 text-gray-200 transition hover:border-yellow-500 hover:text-yellow-400"
               >
                 Track
               </a>
