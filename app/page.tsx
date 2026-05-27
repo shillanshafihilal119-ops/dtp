@@ -160,6 +160,25 @@ export default function Home() {
     }
 
     setSubmittedId(requestId);
+
+    fetch("/api/notify-request", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    request_id: requestId,
+    teacher_name: teacherName,
+    phone,
+    school,
+    class: studentClass,
+    subject,
+    medium,
+  }),
+}).catch((error) => {
+  console.log("Notification failed", error);
+});
+
     setLoading(false);
 
     setTimeout(() => {
