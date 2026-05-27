@@ -238,9 +238,9 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="mb-10 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 shadow-lg">
+        <div className="mb-8 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 shadow-lg sm:mb-10 sm:p-6">
           <div className="mb-6">
-            <p className="text-2xl font-bold text-yellow-500">Pricing</p>
+            <p className="text-xl font-bold text-yellow-500 sm:text-2xl">Pricing</p>
             <p className="mt-2 text-gray-400">
               Rates are charged per final PDF page. The final amount is
               calculated after your formatted PDF is uploaded by admin.
@@ -257,7 +257,7 @@ export default function Home() {
                   {price.medium}
                 </p>
 
-                <p className="mt-3 text-3xl font-bold">
+                <p className="mt-3 text-2xl font-bold sm:text-3xl">
                   ₹{price.rate_per_page}
                 </p>
 
@@ -313,7 +313,7 @@ export default function Home() {
         <form
           id="request-form"
           onSubmit={handleSubmit}
-          className="grid w-full gap-4 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 shadow-lg sm:grid-cols-2 sm:p-8"
+          className="grid w-full gap-3 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 shadow-lg sm:grid-cols-2 sm:gap-4 sm:p-8"
         >
           <input required type="text" placeholder="Teacher Name" value={teacherName} onChange={(e) => setTeacherName(e.target.value)} className="rounded border p-3" />
           <input required type="text" placeholder="School Name" value={school} onChange={(e) => setSchool(e.target.value)} className="rounded border p-3" />
@@ -366,7 +366,7 @@ export default function Home() {
           {submittedId && (
             <div
               ref={submittedBoxRef}
-              className="rounded-2xl border border-green-500/30 bg-black/60 p-5 text-white sm:col-span-2"
+              className="rounded-2xl border border-green-500/30 bg-black/60 p-4 text-white sm:col-span-2 sm:p-5"
             >
               <p className="text-xl font-bold text-green-400">
                 ✓ Request Submitted Successfully
