@@ -46,7 +46,12 @@ export default function AdminPricingPage() {
           "Content-Type": "application/json",
           "x-admin-password": process.env.NEXT_PUBLIC_ADMIN_PASSWORD!,
         },
-        body: JSON.stringify({ prices }),
+        body: JSON.stringify({
+  prices: prices.map((price) => ({
+    ...price,
+    rate_per_page: Number(price.rate_per_page || 1),
+  })),
+}),
       });
 
       const result = await res.json();
@@ -140,19 +145,35 @@ export default function AdminPricingPage() {
                     </span>
 
                     <input
-                      type="number"
-                      min={1}
-                      value={price.rate_per_page}
-                      onChange={(e) => {
-                        const updated = [...prices];
-                        updated[index] = {
-                          ...updated[index],
-                          rate_per_page: Number(e.target.value),
-                        };
-                        setPrices(updated);
-                      }}
-                      className="w-full bg-transparent p-3 text-lg font-bold text-white outline-none"
-                    />
+  type="number"
+  min={1}
+  value={price.rate_per_page ?? ""}
+  onChange={(e) => {
+    const updated = [...prices];
+
+    updated[index] = {
+      ...updated[index],
+      rate_per_page:
+        e.target.value === "" ? "" : Number(e.target.value),
+    };
+
+    setPrices(updated);
+  }}
+  onBlur={() => {
+    const updated = [...prices];
+
+    updated[index] = {
+      ...updated[index],
+      rate_per_page:
+        Number(updated[index].rate_per_page) > 0
+          ? Number(updated[index].rate_per_page)
+          : 1,
+    };
+
+    setPrices(updated);
+  }}
+  className="w-full bg-transparent p-3 text-lg font-bold text-white outline-none"
+/>
                   </div>
                 </div>
               ))}

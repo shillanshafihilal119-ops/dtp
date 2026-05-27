@@ -22,7 +22,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [prices, setPrices] = useState<any[]>([]);
   const [estimateMedium, setEstimateMedium] = useState("Urdu");
-  const [estimatePages, setEstimatePages] = useState(1);
+  const [estimatePages, setEstimatePages] = useState<number | "">(1);
 
   const submittedBoxRef = useRef<HTMLDivElement | null>(null);
 
@@ -54,7 +54,10 @@ export default function Home() {
   }
 
   const estimatedRate = getRateByMedium(estimateMedium);
-  const estimatedTotal = Math.max(1, estimatePages || 1) * estimatedRate;
+  const estimatedPagesValue =
+  estimatePages === "" ? 1 : Math.max(1, Number(estimatePages));
+
+const estimatedTotal = estimatedPagesValue * estimatedRate;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -285,15 +288,22 @@ export default function Home() {
               </select>
 
               <input
-                type="number"
-                min={1}
-                value={estimatePages}
-                onChange={(e) =>
-                  setEstimatePages(Math.max(1, Number(e.target.value) || 1))
-                }
-                placeholder="Estimated pages"
-                className="rounded border border-yellow-500/20 bg-black p-3 text-white outline-none focus:border-yellow-500"
-              />
+  type="number"
+  min={1}
+  value={estimatePages}
+  onChange={(e) =>
+    setEstimatePages(
+      e.target.value === "" ? "" : Number(e.target.value)
+    )
+  }
+  onBlur={() => {
+    if (estimatePages === "" || Number(estimatePages) < 1) {
+      setEstimatePages(1);
+    }
+  }}
+  placeholder="Estimated pages"
+  className="rounded border border-yellow-500/20 bg-black p-3 text-white outline-none focus:border-yellow-500"
+/>
             </div>
 
             <div className="mt-5 rounded-xl border border-yellow-500/20 bg-zinc-950 p-5 text-center">
