@@ -55,9 +55,9 @@ export default function Home() {
 
   const estimatedRate = getRateByMedium(estimateMedium);
   const estimatedPagesValue =
-  estimatePages === "" ? 1 : Math.max(1, Number(estimatePages));
+    estimatePages === "" ? 1 : Math.max(1, Number(estimatePages));
 
-const estimatedTotal = estimatedPagesValue * estimatedRate;
+  const estimatedTotal = estimatedPagesValue * estimatedRate;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -207,25 +207,31 @@ const estimatedTotal = estimatedPagesValue * estimatedRate;
           </a>
         </div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
-          <div className="rounded border border-yellow-500/20 bg-zinc-900 p-4">
-            <p className="font-bold text-yellow-400">⚡ 1 Day Delivery</p>
-            <p className="mt-2 text-sm text-gray-400">
-              Fast turnaround for urgent school and coaching papers.
+        <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-4">
+          <div className="rounded border border-yellow-500/20 bg-zinc-900 p-3 sm:p-4">
+            <p className="text-sm font-bold text-yellow-400 sm:text-base">
+              1 Day
+            </p>
+            <p className="mt-1 text-xs text-gray-400 sm:mt-2 sm:text-sm">
+              Fast delivery
             </p>
           </div>
 
-          <div className="rounded border border-yellow-500/20 bg-zinc-900 p-4">
-            <p className="font-bold text-yellow-400">📄 Clean PDF Output</p>
-            <p className="mt-2 text-sm text-gray-400">
-              Proper formatting, spacing, headings, and printable layout.
+          <div className="rounded border border-yellow-500/20 bg-zinc-900 p-3 sm:p-4">
+            <p className="text-sm font-bold text-yellow-400 sm:text-base">
+              PDF
+            </p>
+            <p className="mt-1 text-xs text-gray-400 sm:mt-2 sm:text-sm">
+              Clean output
             </p>
           </div>
 
-          <div className="rounded border border-yellow-500/20 bg-zinc-900 p-4">
-            <p className="font-bold text-yellow-400">✓ Correction Support</p>
-            <p className="mt-2 text-sm text-gray-400">
-              Request corrections after delivery when needed.
+          <div className="rounded border border-yellow-500/20 bg-zinc-900 p-3 sm:p-4">
+            <p className="text-sm font-bold text-yellow-400 sm:text-base">
+              Support
+            </p>
+            <p className="mt-1 text-xs text-gray-400 sm:mt-2 sm:text-sm">
+              Corrections
             </p>
           </div>
         </div>
@@ -242,43 +248,51 @@ const estimatedTotal = estimatedPagesValue * estimatedRate;
         </div>
 
         <div className="mb-8 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 shadow-lg sm:mb-10 sm:p-6">
-          <div className="mb-6">
-            <p className="text-xl font-bold text-yellow-500 sm:text-2xl">Pricing</p>
-            <p className="mt-2 text-gray-400">
+          <div className="mb-5 sm:mb-6">
+            <p className="text-xl font-bold text-yellow-500 sm:text-2xl">
+              Pricing
+            </p>
+            <p className="mt-2 text-sm leading-6 text-gray-400 sm:text-base">
               Rates are charged per final PDF page. The final amount is
               calculated after your formatted PDF is uploaded by admin.
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-3 sm:gap-4">
             {prices.map((price) => (
               <div
                 key={price.medium}
-                className="rounded-xl border border-yellow-500/10 bg-black/40 p-4"
+                className="rounded-xl border border-yellow-500/10 bg-black/40 p-3 sm:p-4"
               >
-                <p className="font-semibold text-yellow-400">
+                <p className="truncate text-sm font-semibold text-yellow-400 sm:text-base">
                   {price.medium}
                 </p>
 
-                <p className="mt-3 text-2xl font-bold sm:text-3xl">
+                <p className="mt-2 text-xl font-bold sm:mt-3 sm:text-3xl">
                   ₹{price.rate_per_page}
                 </p>
 
-                <p className="text-sm text-gray-400">per page</p>
+                <p className="text-xs text-gray-400 sm:text-sm">per page</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-8 rounded-xl border border-yellow-500/10 bg-black/40 p-5">
-            <p className="mb-4 text-lg font-bold text-yellow-500">
-              Price Estimator
-            </p>
+          <div className="mt-5 rounded-xl border border-yellow-500/10 bg-black/40 p-4 sm:mt-8 sm:p-5">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <p className="text-base font-bold text-yellow-500 sm:text-lg">
+                Price Estimator
+              </p>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+              <p className="text-2xl font-bold text-yellow-500 sm:hidden">
+                ₹{estimatedTotal}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <select
                 value={estimateMedium}
                 onChange={(e) => setEstimateMedium(e.target.value)}
-                className="rounded border border-yellow-500/20 bg-black p-3 text-white outline-none focus:border-yellow-500"
+                className="min-w-0 rounded border border-yellow-500/20 bg-black p-3 text-sm text-white outline-none focus:border-yellow-500 sm:text-base"
               >
                 {prices.map((price) => (
                   <option key={price.medium} value={price.medium}>
@@ -288,25 +302,25 @@ const estimatedTotal = estimatedPagesValue * estimatedRate;
               </select>
 
               <input
-  type="number"
-  min={1}
-  value={estimatePages}
-  onChange={(e) =>
-    setEstimatePages(
-      e.target.value === "" ? "" : Number(e.target.value)
-    )
-  }
-  onBlur={() => {
-    if (estimatePages === "" || Number(estimatePages) < 1) {
-      setEstimatePages(1);
-    }
-  }}
-  placeholder="Estimated pages"
-  className="rounded border border-yellow-500/20 bg-black p-3 text-white outline-none focus:border-yellow-500"
-/>
+                type="number"
+                min={1}
+                value={estimatePages}
+                onChange={(e) =>
+                  setEstimatePages(
+                    e.target.value === "" ? "" : Number(e.target.value)
+                  )
+                }
+                onBlur={() => {
+                  if (estimatePages === "" || Number(estimatePages) < 1) {
+                    setEstimatePages(1);
+                  }
+                }}
+                placeholder="Pages"
+                className="min-w-0 rounded border border-yellow-500/20 bg-black p-3 text-sm text-white outline-none focus:border-yellow-500 sm:text-base"
+              />
             </div>
 
-            <div className="mt-5 rounded-xl border border-yellow-500/20 bg-zinc-950 p-5 text-center">
+            <div className="mt-5 hidden rounded-xl border border-yellow-500/20 bg-zinc-950 p-5 text-center sm:block">
               <p className="text-sm text-gray-400">Estimated Cost</p>
 
               <p className="mt-2 text-4xl font-bold text-yellow-500">
@@ -317,6 +331,10 @@ const estimatedTotal = estimatedPagesValue * estimatedRate;
                 This is only an estimate. Final amount depends on final PDF page count.
               </p>
             </div>
+
+            <p className="mt-3 text-xs leading-5 text-gray-500 sm:hidden">
+              Estimate only. Final amount depends on final PDF pages.
+            </p>
           </div>
         </div>
 
@@ -468,105 +486,132 @@ const estimatedTotal = estimatedPagesValue * estimatedRate;
         </form>
       </section>
 
-      <section className="mx-auto mt-20 max-w-6xl">
-        <h2 className="mb-10 text-center text-3xl font-bold text-yellow-500">
+      <section className="mx-auto mt-12 max-w-6xl sm:mt-20">
+        <h2 className="mb-5 text-center text-2xl font-bold text-yellow-500 sm:mb-10 sm:text-3xl">
           How It Works
         </h2>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
           {[
-            ["📝", "Upload Paper", "Submit handwritten question paper details and images."],
-            ["⚙️", "Formatting", "We professionally format Urdu, Kashmiri and English papers."],
-            ["👀", "Preview", "Preview image appears before final delivery."],
-            ["📄", "Final PDF", "Download the final printable PDF after completion."],
-          ].map(([icon, title, text]) => (
+            ["Upload", "Send details and paper image."],
+            ["Format", "We prepare a clean PDF."],
+            ["Preview", "Check preview before payment."],
+            ["Download", "Get final printable PDF."],
+          ].map(([title, text]) => (
             <div
               key={title}
-              className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-6 transition hover:-translate-y-1 hover:border-yellow-500"
+              className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-4 transition hover:-translate-y-1 hover:border-yellow-500 sm:p-6"
             >
-              <div className="mb-4 text-3xl">{icon}</div>
-              <h3 className="text-lg font-bold">{title}</h3>
-              <p className="mt-3 text-sm text-gray-400">{text}</p>
+              <h3 className="text-sm font-bold text-yellow-400 sm:text-lg">
+                {title}
+              </h3>
+              <p className="mt-2 text-xs leading-5 text-gray-400 sm:mt-3 sm:text-sm">
+                {text}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="mx-auto mt-20 max-w-6xl">
-        <h2 className="mb-10 text-center text-3xl font-bold text-yellow-500">
+      <section className="mx-auto mt-12 max-w-6xl sm:mt-20">
+        <h2 className="mb-5 text-center text-2xl font-bold text-yellow-500 sm:mb-10 sm:text-3xl">
           Why Choose Vintage DTP
         </h2>
 
-        <div className="grid gap-6 sm:grid-cols-3">
-          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-6">
-            <h3 className="font-bold text-yellow-400">Professional Formatting</h3>
-            <p className="mt-3 text-gray-400">
-              Clean Urdu, Kashmiri and English layouts with proper spacing and structure.
+        <div className="grid grid-cols-3 gap-3 sm:gap-6">
+          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-3 sm:p-6">
+            <h3 className="text-sm font-bold text-yellow-400 sm:text-base">
+              Formatting
+            </h3>
+            <p className="mt-2 text-xs leading-5 text-gray-400 sm:mt-3 sm:text-base">
+              Clean layouts.
             </p>
           </div>
 
-          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-6">
-            <h3 className="font-bold text-yellow-400">Correction Support</h3>
-            <p className="mt-3 text-gray-400">
-              Request revisions after delivery when corrections are needed.
+          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-3 sm:p-6">
+            <h3 className="text-sm font-bold text-yellow-400 sm:text-base">
+              Corrections
+            </h3>
+            <p className="mt-2 text-xs leading-5 text-gray-400 sm:mt-3 sm:text-base">
+              Revisions supported.
             </p>
           </div>
 
-          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-6">
-            <h3 className="font-bold text-yellow-400">Fast Delivery</h3>
-            <p className="mt-3 text-gray-400">
-              Most work is completed within 1 day after submission.
+          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-3 sm:p-6">
+            <h3 className="text-sm font-bold text-yellow-400 sm:text-base">
+              Delivery
+            </h3>
+            <p className="mt-2 text-xs leading-5 text-gray-400 sm:mt-3 sm:text-base">
+              Fast turnaround.
             </p>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto mt-20 max-w-6xl">
-        <h2 className="mb-10 text-center text-3xl font-bold text-yellow-500">
+      <section className="mx-auto mt-12 max-w-6xl sm:mt-20">
+        <h2 className="mb-5 text-center text-2xl font-bold text-yellow-500 sm:mb-10 sm:text-3xl">
           Trusted Service
         </h2>
 
-        <div className="grid gap-6 sm:grid-cols-3">
-          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-8 text-center">
-            <p className="text-4xl font-bold text-yellow-400">100+</p>
-            <p className="mt-3 text-gray-400">Papers Formatted</p>
+        <div className="grid grid-cols-3 gap-3 sm:gap-6">
+          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-4 text-center sm:p-8">
+            <p className="text-2xl font-bold text-yellow-400 sm:text-4xl">
+              100+
+            </p>
+            <p className="mt-2 text-xs text-gray-400 sm:mt-3 sm:text-base">
+              Papers
+            </p>
           </div>
 
-          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-8 text-center">
-            <p className="text-4xl font-bold text-yellow-400">1 Day</p>
-            <p className="mt-3 text-gray-400">Average Delivery</p>
+          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-4 text-center sm:p-8">
+            <p className="text-2xl font-bold text-yellow-400 sm:text-4xl">
+              1 Day
+            </p>
+            <p className="mt-2 text-xs text-gray-400 sm:mt-3 sm:text-base">
+              Delivery
+            </p>
           </div>
 
-          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-8 text-center">
-            <p className="text-4xl font-bold text-yellow-400">Urdu</p>
-            <p className="mt-3 text-gray-400">Kashmiri • English</p>
+          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-4 text-center sm:p-8">
+            <p className="text-2xl font-bold text-yellow-400 sm:text-4xl">
+              3
+            </p>
+            <p className="mt-2 text-xs text-gray-400 sm:mt-3 sm:text-base">
+              Languages
+            </p>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto mt-20 mb-20 max-w-6xl">
-        <h2 className="mb-10 text-center text-3xl font-bold text-yellow-500">
+      <section className="mx-auto mt-12 mb-14 max-w-6xl sm:mt-20 sm:mb-20">
+        <h2 className="mb-5 text-center text-2xl font-bold text-yellow-500 sm:mb-10 sm:text-3xl">
           Frequently Asked Questions
         </h2>
 
-        <div className="space-y-4">
-          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-6">
-            <h3 className="font-bold">How long does delivery take?</h3>
-            <p className="mt-3 text-gray-400">
+        <div className="grid gap-3 sm:space-y-4">
+          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-4 sm:p-6">
+            <h3 className="text-sm font-bold sm:text-base">
+              How long does delivery take?
+            </h3>
+            <p className="mt-2 text-xs text-gray-400 sm:mt-3 sm:text-base">
               Most papers are completed within 1 day.
             </p>
           </div>
 
-          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-6">
-            <h3 className="font-bold">Can I request corrections?</h3>
-            <p className="mt-3 text-gray-400">
+          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-4 sm:p-6">
+            <h3 className="text-sm font-bold sm:text-base">
+              Can I request corrections?
+            </h3>
+            <p className="mt-2 text-xs text-gray-400 sm:mt-3 sm:text-base">
               Yes. Corrections can be requested after delivery.
             </p>
           </div>
 
-          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-6">
-            <h3 className="font-bold">Which languages are supported?</h3>
-            <p className="mt-3 text-gray-400">
+          <div className="rounded-xl border border-yellow-500/20 bg-zinc-900 p-4 sm:p-6">
+            <h3 className="text-sm font-bold sm:text-base">
+              Which languages are supported?
+            </h3>
+            <p className="mt-2 text-xs text-gray-400 sm:mt-3 sm:text-base">
               Urdu, Kashmiri and English.
             </p>
           </div>

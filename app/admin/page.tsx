@@ -424,7 +424,7 @@ if (status === "Ready" && !request.final_pdf_url) {
 
               <a
                 href="/archive"
-                className="rounded bg-yellow-500 px-4 py-2 font-semibold text-black hover:bg-yellow-400"
+                className="rounded bg-yellow-500 px-4 py-2 text-center font-semibold text-black hover:bg-yellow-400"
               >
                 Archive
               </a>
