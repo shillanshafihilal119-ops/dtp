@@ -41,23 +41,22 @@ export default function RootLayout({
 
         <header className="border-b border-yellow-500/20 bg-black/90">
 
-          <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+          <div className="max-w-6xl mx-auto flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
 
             <a
   href="/"
   className="group"
 >
-  <h1 className="text-2xl font-bold text-yellow-500 transition group-hover:text-yellow-400">
+  <h1 className="text-xl font-bold text-yellow-500 transition group-hover:text-yellow-400 sm:text-2xl">
     Vintage DTP
   </h1>
 
-  <p className="text-sm text-gray-400">
+  <p className="text-xs text-gray-400 sm:text-sm">
     Urdu & Kashmiri Paper Formatting
   </p>
 </a>
 
-            <nav className="flex items-center gap-8">
-
+            <nav className="flex w-full items-center justify-between gap-3 text-sm sm:w-auto sm:justify-end sm:gap-8 sm:text-base">
               <a
                 href="/"
                 className="hover:text-yellow-400 transition"
@@ -74,7 +73,7 @@ export default function RootLayout({
 
               <a
                 href="/admin-login"
-                className="bg-yellow-500 text-black px-4 py-2 rounded font-semibold hover:bg-yellow-400 transition"
+                className="rounded bg-yellow-500 px-3 py-2 text-sm font-semibold text-black transition hover:bg-yellow-400 sm:px-4 sm:text-base"
               >
                 Admin Login
               </a>
