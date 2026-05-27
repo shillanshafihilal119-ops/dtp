@@ -360,7 +360,7 @@ if (status === "Ready" && !request.final_pdf_url) {
     <>
       {showDeleteModal && (
         <div className="fixed inset-0 z-9999 flex items-start justify-center bg-black/80 p-6 pt-24">
-          <div className="w-full max-w-md rounded-2xl border border-red-500/20 bg-zinc-950 p-8 shadow-2xl">
+          <div className="w-full max-w-md rounded-2xl border border-red-500/20 bg-zinc-950 p-5 shadow-2xl sm:p-8">
             <p className="text-2xl font-bold text-red-400">Delete Request?</p>
             <p className="mt-3 text-gray-400">This action cannot be undone.</p>
 
@@ -388,7 +388,7 @@ if (status === "Ready" && !request.final_pdf_url) {
         </div>
       )}
 
-      <main className="min-h-screen px-6 py-12 sm:px-10 animate-fade-in">
+      <main className="min-h-screen px-4 py-8 sm:px-10 sm:py-12 animate-fade-in">
         {toast && (
           <div className="fixed right-6 top-6 z-9999 rounded-2xl border border-green-500/20 bg-zinc-950 p-5 shadow-xl">
             <p className="font-bold text-green-400">✓ Success</p>
@@ -411,7 +411,7 @@ if (status === "Ready" && !request.final_pdf_url) {
                 Admin Panel
               </p>
 
-              <h1 className="text-4xl font-bold text-yellow-500">
+              <h1 className="text-3xl font-bold text-yellow-500 sm:text-4xl">
                 Admin Dashboard
               </h1>
 
@@ -420,7 +420,7 @@ if (status === "Ready" && !request.final_pdf_url) {
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="grid gap-3 sm:flex">
 
               <a
                 href="/archive"
@@ -475,7 +475,7 @@ if (status === "Ready" && !request.final_pdf_url) {
           <div className="mb-8 grid gap-4 sm:grid-cols-2">
   <a
     href="/admin/pricing"
-    className="group relative overflow-hidden rounded-2xl border border-yellow-500/30 bg-linear-to-br from-yellow-500/15 via-zinc-950 to-zinc-950 p-6 shadow-[0_0_24px_rgba(234,179,8,0.08)] transition hover:border-yellow-500/70 hover:shadow-[0_0_30px_rgba(234,179,8,0.16)]"
+    className="group relative overflow-hidden rounded-2xl border border-yellow-500/30 bg-linear-to-br from-yellow-500/15 via-zinc-950 to-zinc-950 p-5 sm:p-6 shadow-[0_0_24px_rgba(234,179,8,0.08)] transition hover:border-yellow-500/70 hover:shadow-[0_0_30px_rgba(234,179,8,0.16)]"
   >
     <div className="flex items-center justify-between gap-4">
       <div>
@@ -500,7 +500,7 @@ if (status === "Ready" && !request.final_pdf_url) {
 
   <a
     href="/admin/payments"
-    className="group relative overflow-hidden rounded-2xl border border-emerald-500/25 bg-linear-to-br from-emerald-500/12 via-zinc-950 to-zinc-950 p-6 shadow-[0_0_24px_rgba(16,185,129,0.07)] transition hover:border-emerald-500/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.14)]"
+    className="group relative overflow-hidden rounded-2xl border border-emerald-500/25 bg-linear-to-br from-emerald-500/12 via-zinc-950 to-zinc-950 p-5 sm:p-6 shadow-[0_0_24px_rgba(16,185,129,0.07)] transition hover:border-emerald-500/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.14)]"
   >
     <div className="flex items-center justify-between gap-4">
       <div>
@@ -524,7 +524,7 @@ if (status === "Ready" && !request.final_pdf_url) {
   </a>
 </div>
 
-          <div className="mb-8 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6">
+          <div className="mb-8 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 sm:p-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <input
                 type="text"
@@ -627,7 +627,7 @@ if (status === "Ready" && !request.final_pdf_url) {
               return (
                 <div
                   key={request.id}
-                  className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 shadow-lg"
+                  className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 shadow-lg sm:p-6"
                 >
                   <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
