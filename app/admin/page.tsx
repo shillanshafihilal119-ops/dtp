@@ -442,7 +442,7 @@ if (status === "Ready" && !request.final_pdf_url) {
             </div>
           </div>
 
-          <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {[
               [
                 "Submitted",
@@ -464,18 +464,18 @@ if (status === "Ready" && !request.final_pdf_url) {
             ].map(([label, value, color]) => (
               <div
                 key={label}
-                className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-5"
+                className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 sm:p-5"
               >
                 <p className="text-sm text-gray-400">{label}</p>
-                <p className={`mt-2 text-3xl font-bold ${color}`}>{value}</p>
+                <p className={`mt-2 text-2xl font-bold sm:text-3xl ${color}`}>{value}</p>
               </div>
             ))}
           </div>
 
-          <div className="mb-8 grid gap-4 sm:grid-cols-2">
+          <div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4">
   <a
     href="/admin/pricing"
-    className="group relative overflow-hidden rounded-2xl border border-yellow-500/30 bg-linear-to-br from-yellow-500/15 via-zinc-950 to-zinc-950 p-5 sm:p-6 shadow-[0_0_24px_rgba(234,179,8,0.08)] transition hover:border-yellow-500/70 hover:shadow-[0_0_30px_rgba(234,179,8,0.16)]"
+    className="group relative overflow-hidden rounded-2xl border border-yellow-500/30 bg-linear-to-br from-yellow-500/15 via-zinc-950 to-zinc-950 p-4 sm:p-6 shadow-[0_0_24px_rgba(234,179,8,0.08)] transition hover:border-yellow-500/70 hover:shadow-[0_0_30px_rgba(234,179,8,0.16)]"
   >
     <div className="flex items-center justify-between gap-4">
       <div>
@@ -483,7 +483,7 @@ if (status === "Ready" && !request.final_pdf_url) {
           Manage Rates
         </p>
 
-        <p className="mt-2 text-2xl font-bold text-yellow-400">
+        <p className="mt-2 text-lg font-bold text-yellow-400 sm:text-2xl">
           Pricing Settings
         </p>
 
@@ -492,7 +492,7 @@ if (status === "Ready" && !request.final_pdf_url) {
         </p>
       </div>
 
-      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-500 text-2xl font-black text-black transition group-hover:scale-105">
+      <span className="hidden h-12 w-12 items-center justify-center rounded-xl bg-yellow-500 text-2xl font-black text-black transition group-hover:scale-105 sm:flex">
         ₹
       </span>
     </div>
@@ -500,7 +500,7 @@ if (status === "Ready" && !request.final_pdf_url) {
 
   <a
     href="/admin/payments"
-    className="group relative overflow-hidden rounded-2xl border border-emerald-500/25 bg-linear-to-br from-emerald-500/12 via-zinc-950 to-zinc-950 p-5 sm:p-6 shadow-[0_0_24px_rgba(16,185,129,0.07)] transition hover:border-emerald-500/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.14)]"
+    className="group relative overflow-hidden rounded-2xl border border-emerald-500/25 bg-linear-to-br from-emerald-500/12 via-zinc-950 to-zinc-950 p-4 sm:p-6 shadow-[0_0_24px_rgba(16,185,129,0.07)] transition hover:border-emerald-500/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.14)]"
   >
     <div className="flex items-center justify-between gap-4">
       <div>
@@ -508,7 +508,7 @@ if (status === "Ready" && !request.final_pdf_url) {
           Money Log
         </p>
 
-        <p className="mt-2 text-2xl font-bold text-emerald-400">
+        <p className="mt-2 text-lg font-bold text-emerald-400 sm:text-2xl">
           Payment History
         </p>
 
@@ -517,7 +517,7 @@ if (status === "Ready" && !request.final_pdf_url) {
         </p>
       </div>
 
-      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500 text-2xl font-black text-black transition group-hover:scale-105">
+      <span className="hidden h-12 w-12 items-center justify-center rounded-xl bg-emerald-500 text-2xl font-black text-black transition group-hover:scale-105 sm:flex">
         ₹
       </span>
     </div>
@@ -725,7 +725,7 @@ if (status === "Ready" && !request.final_pdf_url) {
   </div>
 )}
 
-                  <div className="mb-6 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="mb-6 grid grid-cols-2 gap-3 text-sm sm:gap-4 lg:grid-cols-3">
                     <p>
                       <b>Phone:</b> {request.phone}
                     </p>
@@ -779,7 +779,7 @@ if (status === "Ready" && !request.final_pdf_url) {
                       </div>
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                       {timeline.map(([label, value, active]: any) => (
                         <div
                           key={label}
@@ -1037,7 +1037,7 @@ Thank you for choosing Vintage DTP.`
             })}
 
             {filteredRequests.length === 0 && (
-              <p className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-6 text-gray-400">
+              <p className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 shadow-lg sm:p-6">
                 No active requests found.
               </p>
             )}
