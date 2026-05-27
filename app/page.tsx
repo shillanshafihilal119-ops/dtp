@@ -163,7 +163,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen px-6 py-12 sm:px-10">
+    <main className="min-h-screen px-4 py-8 sm:px-10 sm:py-12">
       {loading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
           <div className="rounded-lg border border-yellow-500 bg-black p-6">
@@ -172,23 +172,23 @@ export default function Home() {
         </div>
       )}
 
-      <section className="mx-auto mb-16 max-w-6xl">
+      <section className="mx-auto mb-12 max-w-6xl sm:mb-16">
         <p className="mb-4 inline-block rounded-full border border-yellow-500/40 px-4 py-2 text-sm text-yellow-400">
           Trusted by Teachers • 1 Day Delivery
         </p>
 
-        <h1 className="max-w-4xl text-4xl font-bold leading-tight sm:text-6xl">
+        <h1 className="max-w-4xl text-3xl font-bold leading-tight sm:text-6xl">
           Professional
           <span className="text-yellow-500"> Urdu & Kashmiri </span>
           Question Paper Formatting
         </h1>
 
-        <p className="mt-6 max-w-2xl text-lg text-gray-400">
+        <p className="mt-5 max-w-2xl text-base leading-7 text-gray-400 sm:mt-6 sm:text-lg">
           Upload handwritten question papers and receive clean, printable PDFs
           with accurate formatting, proper layout, and fast delivery.
         </p>
 
-        <div className="mt-8 flex flex-wrap gap-4">
+        <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap sm:gap-4">
           <a
             href="#request-form"
             className="rounded bg-yellow-500 px-5 py-3 font-semibold text-black transition hover:bg-yellow-400"
