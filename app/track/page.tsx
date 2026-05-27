@@ -241,7 +241,7 @@ export default function TrackPage() {
   }
 
   return (
-    <main className="min-h-screen px-4 py-8 sm:px-10 sm:py-12 animate-fade-in">
+    <main className="min-h-screen px-4 py-7 sm:px-10 sm:py-12">
       {toast && (
         <div className="fixed right-4 top-4 z-9999 rounded-2xl border border-green-500/20 bg-zinc-950 p-4 shadow-xl sm:right-6 sm:top-6 sm:p-5">
           <p className="font-bold text-green-400">✓ Success</p>
@@ -257,7 +257,7 @@ export default function TrackPage() {
         </div>
       )}
 
-      <section className="mx-auto mb-8 max-w-6xl sm:mb-10">
+      <section className="mx-auto mb-7 max-w-6xl sm:mb-10">
         <p className="mb-4 inline-block rounded-full border border-yellow-500/40 px-4 py-2 text-sm text-yellow-400">
           Track Request
         </p>
@@ -266,7 +266,7 @@ export default function TrackPage() {
           Track Your Paper
         </h1>
 
-        <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-400 sm:text-base">
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400 sm:mt-4 sm:text-base sm:leading-7">
           Enter your Request ID for the exact paper. If you do not have it, you
           can search by phone number and select the correct request.
         </p>
@@ -274,7 +274,7 @@ export default function TrackPage() {
 
       <form
         onSubmit={searchRequests}
-        className="mx-auto mb-6 flex max-w-6xl flex-col gap-3 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 sm:flex-row sm:p-6"
+        className="mx-auto mb-5 flex max-w-6xl flex-col gap-3 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 sm:mb-6 sm:flex-row sm:p-6"
       >
         <input
           type="text"
@@ -312,12 +312,11 @@ export default function TrackPage() {
         </button>
       </form>
 
-      <div className="mx-auto mb-8 max-w-6xl rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+      <div className="mx-auto mb-7 max-w-6xl rounded-xl border border-yellow-500/10 bg-black/40 p-3 sm:mb-8 sm:p-4">
         <p className="text-sm leading-6 text-gray-300">
           <span className="font-semibold text-yellow-400">Recommended:</span>{" "}
           Search using your Request ID for the exact paper. Use phone number
-          only if you do not have the Request ID. One phone number may have
-          multiple paper requests.
+          only if you do not have the Request ID.
         </p>
       </div>
 
@@ -346,33 +345,35 @@ export default function TrackPage() {
               key={request.id}
               className="mx-auto w-full max-w-6xl rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 shadow-lg sm:p-6"
             >
-              <div className="mb-5 rounded-xl border border-yellow-500/10 bg-black/40 p-4 sm:mb-6">
-                <p className="text-xs uppercase tracking-wide text-gray-500">
-                  Request ID
-                </p>
+              <div className="mb-4 grid grid-cols-2 gap-3 sm:mb-6">
+                <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-3 sm:p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">
+                    Request ID
+                  </p>
 
-                <p className="mt-1 break-all text-lg font-bold text-yellow-500 sm:text-xl">
-                  {request.request_id}
-                </p>
+                  <p className="mt-1 break-all text-sm font-bold text-yellow-500 sm:text-xl">
+                    {request.request_id}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-3 sm:p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">
+                    Submitted On
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold leading-5 text-white sm:text-base">
+                    {new Date(request.created_at).toLocaleString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
               </div>
 
-              <div className="mb-5 rounded-xl border border-yellow-500/10 bg-black/40 p-4 sm:mb-6">
-                <p className="text-xs uppercase tracking-wide text-gray-500">
-                  Submitted On
-                </p>
-
-                <p className="mt-1 font-semibold text-white">
-                  {new Date(request.created_at).toLocaleString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
                 {[
                   ["Teacher", request.teacher_name],
                   ["School", request.school],
@@ -400,19 +401,19 @@ export default function TrackPage() {
                 ].map(([label, value]) => (
                   <div
                     key={label}
-                    className="rounded-xl border border-yellow-500/10 bg-black/40 p-4"
+                    className="rounded-xl border border-yellow-500/10 bg-black/40 p-3 sm:p-4"
                   >
                     <p className="text-xs uppercase tracking-wide text-gray-500">
                       {label}
                     </p>
 
-                    <p className="mt-1 break-words font-semibold text-white">
+                    <p className="mt-1 wrap-break-word text-sm font-semibold text-white sm:text-base">
                       {value}
                     </p>
                   </div>
                 ))}
 
-                <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+                <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-3 sm:p-4">
                   <p className="text-xs uppercase tracking-wide text-gray-500">
                     Status
                   </p>
@@ -432,7 +433,7 @@ export default function TrackPage() {
                   </span>
                 </div>
 
-                <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+                <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-3 sm:p-4">
                   <p className="text-xs uppercase tracking-wide text-gray-500">
                     Payment
                   </p>
@@ -451,8 +452,8 @@ export default function TrackPage() {
                 </div>
               </div>
 
-              <div className="mt-8">
-                <h3 className="mb-8 text-lg font-bold text-white sm:text-xl">
+              <div className="mt-7 sm:mt-8">
+                <h3 className="mb-6 text-lg font-bold text-white sm:mb-8 sm:text-xl">
                   Delivery Progress
                 </h3>
 
@@ -531,7 +532,7 @@ export default function TrackPage() {
               </div>
 
               {request.status !== "Delivered" && (
-                <div className="mt-6 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 sm:p-5">
+                <div className="mt-5 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 sm:mt-6 sm:p-5">
                   <p className="font-bold text-yellow-500">
                     Estimated Delivery
                   </p>
@@ -551,12 +552,12 @@ export default function TrackPage() {
               )}
 
               {request.preview_url && request.status !== "In Progress" && (
-                <div className="mt-8 flex flex-col items-center">
+                <div className="mt-7 flex flex-col items-center sm:mt-8">
                   <p className="mb-4 text-lg font-bold text-yellow-500">
                     Final Paper Preview
                   </p>
 
-                  <div className="group relative w-full max-w-md overflow-hidden rounded-2xl border border-yellow-500/20 bg-black p-2">
+                  <div className="group relative w-full max-w-xs overflow-hidden rounded-xl border border-yellow-500/20 bg-black p-2 sm:max-w-md sm:rounded-2xl">
                     <img
                       src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/paper-previews/${request.preview_url}`}
                       alt="Final Paper Preview"
@@ -568,7 +569,7 @@ export default function TrackPage() {
 
               {request.payment_status === "Partially Paid" &&
                 request.final_pdf_url && (
-                  <div className="mt-6 rounded-2xl border border-orange-500/30 bg-zinc-950 p-4 sm:p-6">
+                  <div className="mt-5 rounded-2xl border border-orange-500/30 bg-zinc-950 p-4 sm:mt-6 sm:p-6">
                     <p className="text-lg font-bold text-orange-400 sm:text-xl">
                       Additional Pages Added After Correction
                     </p>
@@ -579,28 +580,26 @@ export default function TrackPage() {
                       still valid. Only the extra pages are charged.
                     </p>
 
-                    <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
+                    <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
                       <p>
-                        <b>Previously Paid Pages:</b>{" "}
-                        {request.paid_page_count || 0}
+                        <b>Paid Pages:</b> {request.paid_page_count || 0}
                       </p>
 
                       <p>
-                        <b>Updated Final Pages:</b> {request.page_count || 0}
+                        <b>Final Pages:</b> {request.page_count || 0}
                       </p>
 
                       <p>
-                        <b>Additional Pages:</b> {request.extra_pages || 0}
+                        <b>Extra Pages:</b> {request.extra_pages || 0}
                       </p>
 
                       <p>
-                        <b>Extra Amount:</b> ₹
-                        {request.extra_amount_due || 0}
+                        <b>Extra:</b> ₹{request.extra_amount_due || 0}
                       </p>
                     </div>
 
                     {request.payment_note && (
-                      <p className="mt-4 rounded-xl border border-yellow-500/10 bg-black/40 p-4 text-sm text-gray-300">
+                      <p className="mt-4 rounded-xl border border-yellow-500/10 bg-black/40 p-3 text-sm text-gray-300 sm:p-4">
                         {request.payment_note}
                       </p>
                     )}
@@ -620,7 +619,7 @@ export default function TrackPage() {
               {request.final_pdf_url &&
                 request.payment_status !== "Paid" &&
                 request.payment_status !== "Partially Paid" && (
-                  <div className="mt-6 rounded-2xl border border-yellow-500/30 bg-zinc-950 p-4 sm:p-6">
+                  <div className="mt-5 rounded-2xl border border-yellow-500/30 bg-zinc-950 p-4 sm:mt-6 sm:p-6">
                     <p className="text-lg font-bold text-yellow-500 sm:text-xl">
                       Your paper is ready
                     </p>
@@ -649,7 +648,7 @@ export default function TrackPage() {
                 )}
 
               {request.payment_status === "Paid" && request.final_pdf_url && (
-                <div className="mt-6 rounded-2xl border border-green-500/30 bg-zinc-950 p-4 sm:p-6">
+                <div className="mt-5 rounded-2xl border border-green-500/30 bg-zinc-950 p-4 sm:mt-6 sm:p-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-lg font-bold text-green-400 sm:text-xl">
@@ -685,7 +684,7 @@ export default function TrackPage() {
                 !request.correction_notes &&
                 request.payment_status === "Paid" &&
                 Number(request.extra_amount_due || 0) === 0 && (
-                  <div className="mt-6 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 sm:p-6">
+                  <div className="mt-5 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 sm:mt-6 sm:p-6">
                     <p className="text-lg font-bold text-yellow-500 sm:text-xl">
                       Need Correction?
                     </p>
@@ -755,7 +754,7 @@ export default function TrackPage() {
                 )}
 
               {request.correction_notes && (
-                <div className="mt-6 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 sm:p-6">
+                <div className="mt-5 rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 sm:mt-6 sm:p-6">
                   <p className="font-bold text-yellow-500">
                     Correction Submitted
                   </p>
