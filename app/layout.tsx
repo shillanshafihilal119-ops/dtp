@@ -18,10 +18,10 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://dtp-gules.vercel.app"),
 
   title:
-    "Vintage DTP | Urdu & Kashmiri Question Paper Formatting",
+    "Vintage DTP | Urdu, Kashmiri & English Question Paper Formatting",
 
   description:
-    "Professional Urdu and Kashmiri question paper formatting with clean PDFs and fast delivery.",
+    "Professional Urdu, Kashmiri, and English question paper formatting with clean PDFs and fast delivery.",
 };
 
 export default function RootLayout({
@@ -53,7 +53,7 @@ export default function RootLayout({
               </h1>
 
               <p className="text-xs text-gray-400 sm:text-sm">
-                Urdu & Kashmiri Paper Formatting
+                Urdu, Kashmiri & English Formatting
               </p>
             </a>
 
@@ -95,7 +95,7 @@ export default function RootLayout({
                 </h3>
 
                 <p className="text-gray-300 leading-8">
-                  Professional Urdu and Kashmiri question paper formatting service for teachers, schools, and coaching centers.
+                  Professional Urdu, Kashmiri, and English question paper formatting service for teachers, schools, and coaching centers.
                 </p>
               </div>
 

@@ -26,6 +26,27 @@ export default function Home() {
 
   const submittedBoxRef = useRef<HTMLDivElement | null>(null);
 
+  const samplePapers = [
+  {
+    title: "Urdu Sample",
+    text: "Clean Urdu question paper format.",
+    href: "/samples/urdu-sample.pdf",
+    image: "/samples/urdu-sample.jpg",
+  },
+  {
+    title: "Kashmiri Sample",
+    text: "Formatted Kashmiri paper sample.",
+    href: "/samples/kashmiri-sample.pdf",
+    image: "/samples/kashmiri-sample.jpg",
+  },
+  {
+    title: "English Sample",
+    text: "Simple English paper layout.",
+    href: "/samples/english-sample.pdf",
+    image: "/samples/english-sample.jpg",
+  },
+];
+
   useEffect(() => {
     fetchPricing();
   }, []);
@@ -162,22 +183,22 @@ export default function Home() {
     setSubmittedId(requestId);
 
     fetch("/api/notify-request", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    request_id: requestId,
-    teacher_name: teacherName,
-    phone,
-    school,
-    class: studentClass,
-    subject,
-    medium,
-  }),
-}).catch((error) => {
-  console.log("Notification failed", error);
-});
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        request_id: requestId,
+        teacher_name: teacherName,
+        phone,
+        school,
+        class: studentClass,
+        subject,
+        medium,
+      }),
+    }).catch((error) => {
+      console.log("Notification failed", error);
+    });
 
     setLoading(false);
 
@@ -219,13 +240,13 @@ export default function Home() {
 
         <h1 className="max-w-4xl text-3xl font-bold leading-tight sm:text-6xl">
           Professional
-          <span className="text-yellow-500"> Urdu & Kashmiri </span>
+          <span className="text-yellow-500"> Urdu, Kashmiri & English </span>
           Question Paper Formatting
         </h1>
 
         <p className="mt-5 max-w-2xl text-base leading-7 text-gray-400 sm:mt-6 sm:text-lg">
           Upload handwritten question papers and receive clean, printable PDFs
-          with accurate formatting, proper layout, and fast delivery.
+in Urdu, Kashmiri, or English with accurate formatting and fast delivery.
         </p>
 
         <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap sm:gap-4">
@@ -271,6 +292,64 @@ export default function Home() {
               Corrections
             </p>
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto mb-12 max-w-6xl sm:mb-16">
+        <div className="mb-5 sm:mb-8">
+          <h2 className="text-2xl font-bold text-yellow-500 sm:text-3xl">
+            Sample Papers
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-gray-400 sm:text-base">
+            View sample formatted papers before submitting your request.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 sm:gap-5">
+          {samplePapers.map((sample) => (
+            <a
+              key={sample.title}
+              href={sample.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group rounded-2xl border border-yellow-500/20 bg-zinc-950 p-3 shadow-lg transition hover:border-yellow-500/60 hover:bg-yellow-500/5 sm:p-5"
+            >
+              <div className="relative mb-3 aspect-3/4 overflow-hidden rounded-xl border border-yellow-500/20 bg-black/50 shadow-[inset_0_0_35px_rgba(234,179,8,0.18)] sm:mb-4">
+  <img
+    src={sample.image}
+    alt={sample.title}
+    className="h-full w-full object-cover blur-[1.1px] saturate-75 sepia-[0.18] transition duration-500 group-hover:scale-105 group-hover:blur-[0.7px]"
+  />
+
+  <div className="absolute inset-0 bg-linear-to-br from-yellow-500/18 via-transparent to-black/45 mix-blend-multiply" />
+  <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-yellow-500/10" />
+
+  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+    <div className="rotate-[-16deg] rounded-full border border-yellow-400/40 bg-black/45 px-4 py-2 shadow-[0_0_18px_rgba(234,179,8,0.22)] backdrop-blur-sm">
+      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-yellow-300 sm:text-xs">
+        Vintage DTP
+      </p>
+      <p className="mt-0.5 text-center text-[9px] font-semibold uppercase tracking-[0.18em] text-white/75 sm:text-[10px]">
+        Sample Preview
+      </p>
+    </div>
+  </div>
+</div>
+
+              <p className="text-sm font-bold text-yellow-400 sm:text-lg">
+                {sample.title}
+              </p>
+
+              <p className="mt-1 hidden text-sm leading-6 text-gray-400 sm:block">
+                {sample.text}
+              </p>
+
+              <p className="mt-3 rounded bg-yellow-500 px-3 py-2 text-center text-xs font-bold text-black transition group-hover:bg-yellow-400 sm:text-sm">
+                View
+              </p>
+            </a>
+          ))}
         </div>
       </section>
 
