@@ -629,10 +629,10 @@ if (status === "Ready" && !request.final_pdf_url) {
                   key={request.id}
                   className="rounded-2xl border border-yellow-500/20 bg-zinc-950 p-4 shadow-lg sm:p-6"
                 >
-                  <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-  <h2 className="text-2xl font-bold">
+  <h2 className="text-xl font-bold sm:text-2xl">
     {request.teacher_name}
   </h2>
 
@@ -678,7 +678,7 @@ if (status === "Ready" && !request.final_pdf_url) {
                   </div>
 
                   {request.correction_notes && (
-                    <div className="mb-6 rounded-xl border border-orange-500/30 bg-orange-500/5 p-5">
+                    <div className="mb-5 rounded-xl border border-orange-500/30 bg-orange-500/5 p-4 sm:mb-6 sm:p-5">
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <p className="text-lg font-bold text-orange-400">
@@ -695,7 +695,7 @@ if (status === "Ready" && !request.final_pdf_url) {
                         </span>
                       </div>
 
-                      <p className="mt-4 rounded-lg border border-orange-500/10 bg-black/40 p-4 text-sm leading-relaxed text-gray-300">
+                     <p className="mt-3 rounded-lg border border-orange-500/10 bg-black/40 p-3 text-sm leading-relaxed text-gray-300 sm:mt-4 sm:p-4">
                         {request.correction_notes}
                       </p>
                     </div>
@@ -714,7 +714,7 @@ if (status === "Ready" && !request.final_pdf_url) {
                   )}
 
                   {request.status === "Ready" && request.payment_status === "Unpaid" && (
-  <div className="mb-6 rounded-xl border border-red-500/25 bg-red-500/5 p-4">
+  <div className="mb-5 rounded-xl border border-red-500/25 bg-red-500/5 p-3 sm:mb-6 sm:p-4">
     <p className="font-semibold text-red-400">
       Payment Pending
     </p>
@@ -764,7 +764,7 @@ if (status === "Ready" && !request.final_pdf_url) {
                     </p>
                   </div>
 
-                  <div className="mb-6 rounded-xl border border-yellow-500/10 bg-black/40 p-5">
+                  <div className="mb-5 rounded-xl border border-yellow-500/10 bg-black/40 p-4 sm:mb-6 sm:p-5">
                     <div className="mb-4 flex items-center justify-between gap-4">
                       <div>
                         <p className="text-lg font-bold text-yellow-500">
@@ -783,7 +783,7 @@ if (status === "Ready" && !request.final_pdf_url) {
                       {timeline.map(([label, value, active]: any) => (
                         <div
                           key={label}
-                          className={`rounded-xl border p-4 ${
+                          className={`rounded-xl border p-3 sm:p-4 ${
                             active
                               ? "border-yellow-500/30 bg-yellow-500/5"
                               : "border-zinc-800 bg-black/30"
@@ -825,7 +825,7 @@ if (status === "Ready" && !request.final_pdf_url) {
                     </p>
                   )}
 
-                  <div className="mb-6 grid gap-4 sm:grid-cols-2">
+                  <div className="mb-5 grid grid-cols-2 gap-3 sm:mb-6 sm:gap-4">
                     <div>
                       <p className="mb-2 font-semibold text-yellow-400">
                         Status
@@ -836,7 +836,7 @@ if (status === "Ready" && !request.final_pdf_url) {
                         onChange={(e) =>
                           updateStatus(request, e.target.value)
                         }
-                        className="w-full rounded border bg-grey p-3 text-white focus:bg-yellow-500 focus:text-black"
+                        className="w-full rounded border bg-grey p-2.5 text-sm text-white focus:bg-yellow-500 focus:text-black sm:p-3 sm:text-base"
                       >
                         <option>Submitted</option>
                         <option>In Progress</option>
@@ -872,7 +872,7 @@ if (status === "Ready" && !request.final_pdf_url) {
                         onChange={(e) =>
                           updatePaymentStatus(request, e.target.value)
                         }
-                        className="w-full rounded border bg-grey p-3 text-white focus:bg-yellow-500 focus:text-black"
+                        className="w-full rounded border bg-grey p-2.5 text-sm text-white focus:bg-yellow-500 focus:text-black sm:p-3 sm:text-base"
                       >
                         <option value="Unpaid">Unpaid</option>
                         <option value="Paid">Paid</option>
@@ -890,8 +890,8 @@ if (status === "Ready" && !request.final_pdf_url) {
   </button>
 )}
 
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+                  <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
+                    <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-3 sm:p-4">
                       <p className="mb-3 font-semibold">Final PDF</p>
 
                       {request.final_pdf_url && (
@@ -961,7 +961,7 @@ Thank you for choosing Vintage DTP.`
                       </p>
                     </div>
 
-                    <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-4">
+                    <div className="rounded-xl border border-yellow-500/10 bg-black/40 p-3 sm:p-4">
                       <p className="mb-3 font-semibold">Preview Image</p>
 
                       <input
@@ -996,12 +996,12 @@ Thank you for choosing Vintage DTP.`
                   </div>
 
                   {request.file_url && (
-                    <div className="mt-6 flex flex-col items-center">
+  <div className="mt-5 flex flex-col items-center sm:mt-6">
                       <p className="mb-4 text-lg font-bold text-yellow-500">
                         Uploaded Paper
                       </p>
 
-                      <div className="group relative w-full max-w-md overflow-hidden rounded-2xl border border-yellow-500/20 bg-black p-2">
+                      <div className="group relative w-full max-w-xs overflow-hidden rounded-xl border border-yellow-500/20 bg-black p-2 sm:max-w-md sm:rounded-2xl">
                         <img
                           src={uploadedPaperUrl}
                           alt="Uploaded paper"
