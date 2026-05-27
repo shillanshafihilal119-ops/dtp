@@ -552,20 +552,39 @@ export default function TrackPage() {
               )}
 
               {request.preview_url && request.status !== "In Progress" && (
-                <div className="mt-7 flex flex-col items-center sm:mt-8">
-                  <p className="mb-4 text-lg font-bold text-yellow-500">
-                    Final Paper Preview
-                  </p>
+  <div className="mt-7 flex flex-col items-center sm:mt-8">
+    <p className="mb-4 text-lg font-bold text-yellow-500">
+      Final Paper Preview
+    </p>
 
-                  <div className="group relative w-full max-w-xs overflow-hidden rounded-xl border border-yellow-500/20 bg-black p-2 sm:max-w-md sm:rounded-2xl">
-                    <img
-                      src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/paper-previews/${request.preview_url}`}
-                      alt="Final Paper Preview"
-                      className="h-auto w-full rounded-xl transition-all duration-700 group-hover:scale-105"
-                    />
-                  </div>
-                </div>
-              )}
+    <div className="group relative w-full max-w-xs overflow-hidden rounded-xl border border-yellow-500/20 bg-black p-2 sm:max-w-md sm:rounded-2xl">
+      <img
+        src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/paper-previews/${request.preview_url}`}
+        alt="Final Paper Preview"
+        className="h-auto w-full rounded-xl blur-[1.4px] transition-all duration-700 group-hover:scale-105 group-hover:blur-[1px]"
+      />
+
+      <div className="pointer-events-none absolute inset-2 rounded-xl bg-black/10" />
+
+      <div className="pointer-events-none absolute inset-2 grid grid-cols-3 gap-3 overflow-hidden rounded-xl opacity-45">
+        {Array.from({ length: 24 }).map((_, index) => (
+          <span
+            key={index}
+            className="-rotate-24 select-none whitespace-nowrap text-[10px] font-bold uppercase tracking-wide text-yellow-400/70 sm:text-xs"
+          >
+            Vintage DTP Preview
+          </span>
+        ))}
+      </div>
+
+      <div className="pointer-events-none absolute inset-x-2 bottom-2 rounded-b-xl bg-linear-to-t from-black/75 to-transparent p-3">
+        <p className="text-center text-xs font-semibold text-yellow-400">
+          Preview only. Final PDF unlocks after payment.
+        </p>
+      </div>
+    </div>
+  </div>
+)}
 
               {request.payment_status === "Partially Paid" &&
                 request.final_pdf_url && (
